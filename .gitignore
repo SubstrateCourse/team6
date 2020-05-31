@@ -1,6 +1,7 @@
 **/target/
 **/*.rs.bk
 *.swp
+*.swo
 .wasm-binaries
 pwasm-alloc/target/
 pwasm-libc/target/
