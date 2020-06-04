@@ -15,7 +15,7 @@
 
 * 撤销存证，可调用函数所接收参数为内容的哈希值 Vec<u8>。
 
-  ![image-20200604204532136](/Users/viewfin/Documents/GitHub/team6/lesson2/images/image-20200604204532136.png)
+  ![image-20200604204532136](./images/image-20200604204532136.png)
 
   ![image-20200604205007517](./images/image-20200604205007517.png)
 
