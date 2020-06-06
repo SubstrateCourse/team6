@@ -14,9 +14,17 @@
 * 创建存证，可调用函数所接收参数为内容的哈希值 Vec<u8>；
 * 撤销存证，可调用函数所接收参数为内容的哈希值 Vec<u8>。
 
+![Image text](https://github.com/AmadeusGB/team6/blob/lesson-2/lesson2/images/p1.png)
+![Image text](https://github.com/AmadeusGB/team6/blob/lesson-2/lesson2/images/p2.png)
+![Image text](https://github.com/AmadeusGB/team6/blob/lesson-2/lesson2/images/p3.png)
+![Image text](https://github.com/AmadeusGB/team6/blob/lesson-2/lesson2/images/p4.png)
+
+
 **第二题：为存证模块添加新的功能，**
 
 * 转移存证，接收两个参数，一个是内容的哈希值，另一个是存证的接收账户地址；当存证不存在或者发送请求的用户不是存证内容的拥有人时，返回错误；当所有的检查通过后，更新对应的存证记录，并触发一个事件。
+
+![Image text](https://github.com/AmadeusGB/team6/blob/lesson-2/lesson2/images/p5.png)
 
 **第三题（附加题）：**
 
