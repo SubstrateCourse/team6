@@ -125,7 +125,7 @@ decl_module! {
 		#[weight = 0]
 		pub fn revoke_claim(origin, claim: Vec<u8>) -> dispatch::DispatchResult {
 			let sender = ensure_signed(origin)?;
-			ensure!(!Proofs::<T>::contains_key(&claim),Error::<T>::ClaimNotExist);
+			ensure!(Proofs::<T>::contains_key(&claim),Error::<T>::ClaimNotExist);
 			let (owner,_block_number) = Proofs::<T>::get(&claim);
 			ensure!(owner == sender,Error::<T>::NotClaimOwner);
 			Proofs::<T>::remove(&claim);
@@ -136,7 +136,7 @@ decl_module! {
 		#[weight = 0]
 		pub fn transfer_claim(origin, claim: Vec<u8>,new_owner: T::AccountId) -> dispatch::DispatchResult {
 			let sender = ensure_signed(origin)?;
-			ensure!(!Proofs::<T>::contains_key(&claim),Error::<T>::ClaimNotExist);
+			ensure!(Proofs::<T>::contains_key(&claim),Error::<T>::ClaimNotExist);
 			let (owner,_block_number) = Proofs::<T>::get(&claim);
 			ensure!(owner == sender,Error::<T>::NotClaimOwner);
 			Proofs::<T>::insert(&claim,(new_owner.clone(),system::Module::<T>::block_number()));
