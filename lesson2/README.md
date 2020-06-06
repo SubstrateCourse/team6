@@ -16,7 +16,7 @@
 * 创建存证，可调用函数所接收参数为内容的哈希值 Vec<u8>；
 ![create_claim](./create_claim.jpg)
 * 撤销存证，可调用函数所接收参数为内容的哈希值 Vec<u8>。
-![revoke_claim](./revock_claim.jpg)
+![revoke_claim](./revoke_claim.jpg)
 
 **第二题：为存证模块添加新的功能，**
 
