@@ -28,7 +28,7 @@ decl_storage! {
 	// storage items are isolated from other pallets.
 	// ---------------------------------vvvvvvvvvvvvvv
 	trait Store for Module<T: Trait> as TemplateModule {
-		Proofs get(fn proofs ): map hasher(black2_128_concat)Vec<u8> => (T::AccountId, T::BlockNumber);
+		Proofs get(fn proofs ): map hasher(blake2_128_concat)Vec<u8> => (T::AccountId, T::BlockNumber);
 	}
 }
 
@@ -64,24 +64,24 @@ decl_module! {
 
 		#[weight = 0]
 		pub fn create_claim(origin,claim:Vec<u8>) ->dispatch::DispatchResult {
-			let sender =ensure_signed(origin)?;
+			let sender = ensure_signed(origin)?;
 
 			ensure!(Proofs::<T>::contains_key(&claim),Error::<T>::ProofAlreadyExist);
 
 			Proofs::<T>::insert(&claim,(sender.clone(),system::Module::<T>::block_number()));
 
-			self::deposit_event(RawEvent::Claimcreated(sender,claim));
+			Self::deposit_event(RawEvent::Claimcreated(sender,claim));
 			
 			Ok(())
 		}
 
 		#[weight = 0]
 		pub fn revoke_claim(orgin,claim:Vec<u8>) ->dispatch::DispatchResult{
-			let sender = ensure_signed(origin)?;
+			let sender = ensure_signed(orgin)?;
 
-			ensure!(Proofs::<T>::contains_key(claim),Error::<T>::ClaimNotExist);
+			ensure!(Proofs::<T>::contains_key(&claim),Error::<T>::ClaimNotExist);
 
-			let (owner,block_number) = Proofs::<T>::get(&claim);
+			let (owner,_block_number) = Proofs::<T>::get(&claim);
 
 			ensure!(owner == sender,Error::<T>::NotclaimOwner);
 
