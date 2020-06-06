@@ -153,6 +153,12 @@ package = 'pallet-template'
 path = '../pallets/template'
 version = '2.0.0-rc2'
 
+[dependencies.cun]
+default-features = false
+package = 'pallet-cun'
+path = '../pallets/cun'
+version = '2.0.0-rc2'
+
 [dependencies.timestamp]
 default-features = false
 git = 'https://github.com/paritytech/substrate.git'
@@ -195,6 +201,7 @@ std = [
     'timestamp/std',
     'transaction-payment/std',
     'template/std',
+    'cun/std',
 ]
 
 [build-dependencies.wasm-builder-runner]
