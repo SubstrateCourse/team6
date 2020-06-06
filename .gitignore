@@ -23,7 +23,5 @@ rls*.log
 **/hfuzz_target/
 **/hfuzz_workspace/
 .cargo/
-**/node_modules/
-.vscode
-**/.DS_Store
-**/build/
+
+lesson1/sendpix2.jpg
