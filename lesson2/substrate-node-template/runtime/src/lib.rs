@@ -257,6 +257,12 @@ impl template::Trait for Runtime {
 	type Event = Event;
 }
 
+impl cun::Trait for Runtime {
+	type Event = Event;
+}
+
+
+
 construct_runtime!(
 	pub enum Runtime where
 		Block = Block,
@@ -273,6 +279,7 @@ construct_runtime!(
 		Sudo: sudo::{Module, Call, Config<T>, Storage, Event<T>},
 		// Used for the module template in `./template.rs`
 		TemplateModule: template::{Module, Call, Storage, Event<T>},
+		CunModule: cun::{Module, Call, Storage, Event<T>},
 	}
 );
 
