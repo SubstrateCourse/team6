@@ -9,14 +9,14 @@
 3. 在可调用函数里要有合理的检查；操作成功要触发事件；
 4. 附加题不是必答的，但可以酌情加分。
 
-**第一题：实现存证模块的功能，包括：**
+**第一题：实现存证模块的功能，包括：
 *程序运行
 ![run_program](./run_program.jpg)
 
 * 创建存证，可调用函数所接收参数为内容的哈希值 Vec<u8>；
 ![create_claim](./create_claim.jpg)
 * 撤销存证，可调用函数所接收参数为内容的哈希值 Vec<u8>。
-![revock_claim](./revock_claim.jpg)
+![revoke_claim](./revock_claim.jpg)
 
 **第二题：为存证模块添加新的功能，**
 
