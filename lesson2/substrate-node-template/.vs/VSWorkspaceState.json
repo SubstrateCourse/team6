@@ -2,9 +2,12 @@
   "ExpandedNodes": [
     "",
     "\\pallets",
+    "\\pallets\\poe",
+    "\\pallets\\poe\\src",
     "\\pallets\\template",
-    "\\runtime"
+    "\\runtime",
+    "\\runtime\\src"
   ],
-  "SelectedNode": "\\pallets\\template",
+  "SelectedNode": "\\pallets",
   "PreviewInSolutionExplorer": false
 }
