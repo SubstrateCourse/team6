@@ -3,7 +3,7 @@ import { Form, Input, Grid } from 'semantic-ui-react';
 
 import { useSubstrate } from './substrate-lib';
 import { TxButton } from './substrate-lib/components';
-import { blake2AsHex } from '@polkadot/util';
+import { blake2AsHex } from '@polkadot/util-crypto';
 
 function Main (props) {
   const { api } = useSubstrate();
@@ -12,6 +12,7 @@ function Main (props) {
   // The transaction submission status
   const [status, setStatus] = useState('');
   const [digest, setDigest] = useState('');
+  const [accountId, setAccountId] = useState('5FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty');
   const [owner, setOwner] = useState('');
   const [blockNumber, setBlockNumber] = useState(0);
 
@@ -37,6 +38,7 @@ function Main (props) {
         .join('');
 
       const hash = blake2AsHex(content, 256);
+      console.log(hash);
       setDigest(hash);
     };
 
@@ -53,7 +55,7 @@ function Main (props) {
             type='file'
             id='file'
             lable='Your File'
-            onChange={(e) => handleFileChosen(e.target.files(0))}
+            onChange={(e) => handleFileChosen(e.target.files[0])}
           />
         </Form.Field>
         <Form.Field>
@@ -81,9 +83,21 @@ function Main (props) {
               paramFields: [true]
             }}
           />
+          <TxButton
+            accountPair = {accountPair}
+            label='transfer Claim'
+            setStatus={setStatus}
+            type='SIGNED-TX'
+            attrs={{
+              palletRpc: 'poeModule',
+              callable: 'transferClaim',
+              inputParams: [digest, accountId],
+              paramFields: [true]
+            }}
+          />
         </Form.Field>
         <div>{status}</div>
-        <div>{`Claim info, owner: ${owner}, blockNumber:${blockNumber}`}</div>
+        <div>{`Claim info, owner: ${owner}, blockNumber: ${blockNumber}`}</div>
       </Form>
     </Grid.Column>
   );
@@ -91,6 +105,6 @@ function Main (props) {
 
 export default function PoeModule (props) {
   const { api } = useSubstrate();
-  return (api.query.poeModule && api.query.poeModule.something
+  return (api.query.poeModule && api.query.poeModule.proofs
     ? <Main {...props} /> : null);
 }
