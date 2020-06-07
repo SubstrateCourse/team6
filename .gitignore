@@ -24,3 +24,4 @@ rls*.log
 **/hfuzz_workspace/
 .cargo/
 
+lesson1/sendpix2.jpg
