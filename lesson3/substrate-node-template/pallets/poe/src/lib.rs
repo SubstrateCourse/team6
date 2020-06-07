@@ -42,6 +42,7 @@ decl_event!(
 	pub enum Event<T> where AccountId = <T as system::Trait>::AccountId {
 		ClaimCreated(AccountId, Vec<u8>),
 		ClaimRevoked(AccountId, Vec<u8>),
+		ClaimTrans(AccountId, AccountId, Vec<u8>),
 	}
 );
 
@@ -114,7 +115,9 @@ decl_module! {
 
 			let dest = T::Lookup::lookup(dest)?;
 
-			Proofs::<T>::insert(&claim, (dest, system::Module::<T>::block_number()));
+			Proofs::<T>::insert(&claim, (&dest, system::Module::<T>::block_number()));
+
+			Self::deposit_event(RawEvent::ClaimTrans(sender, dest, claim));
 
 			Ok(())
 		}
