@@ -257,6 +257,10 @@ impl template::Trait for Runtime {
 	type Event = Event;
 }
 
+impl poe::Trait for Runtime {
+	type Event = Event;
+}
+
 construct_runtime!(
 	pub enum Runtime where
 		Block = Block,
