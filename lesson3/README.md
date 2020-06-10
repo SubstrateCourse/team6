@@ -15,11 +15,23 @@
 * 撤销存证的测试用例；
 * 转移存证的测试用例；
 
+![Image text](https://github.com/AmadeusGB/team6/blob/lesson-3/lesson3/images/p1.png)
+
 第二题：编写存证模块的UI，包括
 
 * 创建存证的UI
 * 删除存证的UI
 * 转移存证的UI
+
+* 创建存证latex
+![Image text](https://github.com/AmadeusGB/team6/blob/lesson-3/lesson3/images/p2.png)
+* 删除存证latex
+![Image text](https://github.com/AmadeusGB/team6/blob/lesson-3/lesson3/images/p3.png)
+* 创建存证docker
+![Image text](https://github.com/AmadeusGB/team6/blob/lesson-3/lesson3/images/p4.png)
+* 转移存证docker
+![Image text](https://github.com/AmadeusGB/team6/blob/lesson-3/lesson3/images/p5.png)
+
 
 第三题（附加题）：实现购买存证的功能代码：
 
