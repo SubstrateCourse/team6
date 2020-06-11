@@ -151,6 +151,19 @@ function Main (props) {
             }}
           />
 
+          <TxButton
+            accountPair={accountPair}
+            label='Buy Claim'
+            setStatus={setStatus}
+            type='SIGNED-TX'
+            attrs={{
+              palletRpc: 'poeModule',
+              callable: 'buyClaim',
+              inputParams: [digest, formValue],
+              paramFields: [true]
+            }}
+          />
+
           <Dropdown
             search
             selection
