@@ -38,3 +38,14 @@
 * 用户A为自己的某个存证记录设置价格；
 * 用户B可以以一定的价格购买某个存证，当出价高于用户A设置的价格时，则以用户A设定的价格将费用从用户B转移到用户A，再将该存证进行转移。如果出价低于用户A的价格时，则不进行转移，返回错误。
 
+
+* Bob创建存证latex(设置价格：100000000000000)
+![Image text](https://github.com/AmadeusGB/team6/blob/lesson-3/lesson3/images/p6.png)
+* Alice花费200000000000000，购买latex存证
+![Image text](https://github.com/AmadeusGB/team6/blob/lesson-3/lesson3/images/p7.png)
+* 查看Alice账户，发现确实少了一部分钱
+![Image text](https://github.com/AmadeusGB/team6/blob/lesson-3/lesson3/images/p8.png)
+* Bob想用100000000000000，购买价格为：200000000000000，结果失败了，owner没有改变
+![Image text](https://github.com/AmadeusGB/team6/blob/lesson-3/lesson3/images/p9.png)
+
+
