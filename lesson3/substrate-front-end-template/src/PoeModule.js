@@ -17,12 +17,15 @@ function Main (props) {
   //const [AccountId, setAccountId] = useState('5FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty');
   const [accountSelected, setAccountSelected] = useState('');
   const [blockNumber, setBlockNumber] = useState(0);
+  const [formValue, setFormValue] = useState(0);
+  const [proofValue, setProofValue] = useState(0);
 
   useEffect(() => {
     let unsubscribe;
     api.query.poeModule.proofs(digest,(result) => {
       setOwner(result[0].toString());
       setBlockNumber(result[1].toNumber());
+      setProofValue(result[2].toNumber());
     }).then(unsub => {
       unsubscribe = unsub;
     })
@@ -74,6 +77,15 @@ function Main (props) {
         </Form.Field> 
 
         <Form.Field>
+          <Input
+            label='Price'
+            state='newValue'
+            type='number'
+            onChange={(_, { value }) => setFormValue(value)}
+          />
+        </Form.Field>
+
+        <Form.Field>
           <TxButton
             accountPair = {accountPair}
             label='Create Claim'
@@ -82,7 +94,7 @@ function Main (props) {
             attrs={{
               palletRpc: 'poeModule',
               callable: 'createClaim',
-              inputParams: [digest],
+              inputParams: [digest, formValue],
               paramFields: [true]
             }}
           />
@@ -96,6 +108,19 @@ function Main (props) {
               palletRpc: 'poeModule',
               callable: 'revokeClaim',
               inputParams: [digest],
+              paramFields: [true]
+            }}
+          />
+
+          <TxButton
+            accountPair={accountPair}
+            label='Buy Claim'
+            setStatus={setStatus}
+            type='SIGNED-TX'
+            attrs={{
+              palletRpc: 'poeModule',
+              callable: 'buyClaim',
+              inputParams: [digest, formValue],
               paramFields: [true]
             }}
           />
@@ -120,14 +145,16 @@ function Main (props) {
             attrs={{
               palletRpc: 'poeModule',
               callable: 'transferClaim',
-              inputParams: [digest,accountSelected],
+              inputParams: [digest,accountSelected, formValue],
               paramFields: [true]
             }}
           />
         </Form.Field>
 
         <div>{status}</div>
-            <div>{ `Claim info, owner: ${owner}, blockNumber: ${blockNumber}` }</div>
+            <div>{ `Claim info:owner: ${owner} ` }</div>
+            <div>{`blockNumber: ${blockNumber}`}</div>
+            <div>{`transferValue: ${proofValue}`}</div>
       </Form>
     </Grid.Column>
   );
@@ -135,6 +162,6 @@ function Main (props) {
 
 export default function PoeModule (props) {
   const { api } = useSubstrate();
-  return (api.query.poeModule && api.query.poeModule.proofs
+  return (api.query.poeModule && api.query.poeModule.proofs 
     ? <Main {...props} /> : null);
 }
