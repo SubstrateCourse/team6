@@ -107,7 +107,7 @@ function Main (props) {
             attrs={{
               palletRpc: 'poeModule',
               callable: 'revokeClaim',
-              inputParams: [digest],
+              inputParams: [digest, formValue],
               paramFields: [true]
             }}
           />
