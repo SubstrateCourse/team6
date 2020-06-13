@@ -12,26 +12,26 @@
 第一题：编写存证模块的单元测试代码，包括：
 
 * 创建存证的测试用例；
-!(test_create)[./img/1-1.png]
+![test_create](./img/1-1.png)
 
 * 撤销存证的测试用例；
-!(test_revoke)[./img/1-2.png]
+![test_revoke](./img/1-2.png)
 
 * 转移存证的测试用例；
-!(test_transfer)[./img/1-3.png]
+![test_transfer](./img/1-3.png)
 
 第二题：编写存证模块的UI，包括
 
 * 创建存证的UI
-!(UI_create)[./img/2-1.png]
+![UI_create](./img/2-1.png)
 
 * 删除存证的UI
-!(UI_revoke1)[./img/2-2-1.png]
-!(UI_revoke2)[./img/2-2-2.png]
+![UI_revoke1](./img/2-2-1.png)
+![UI_revoke2](./img/2-2-2.png)
 
 * 转移存证的UI
-!(UI_transfer1)[./img/2-3-1.png]
-!(UI_transfer2)[./img/2-3-2.png]
+![UI_transfer1](./img/2-3-1.png)
+![UI_transfer2](./img/2-3-2.png)
 
 第三题（附加题）：实现购买存证的功能代码：
 
