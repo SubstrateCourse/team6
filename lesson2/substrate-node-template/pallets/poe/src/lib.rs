@@ -18,6 +18,9 @@ pub trait Trait: system::Trait {
 
 	/// The overarching event type.
 	type Event: From<Event<Self>> + Into<<Self as system::Trait>::Event>;
+
+	//附加题答案
+	type MaxClaimLength: Get<u32>;
 }
 
 // This pallet's storage items.
@@ -61,6 +64,8 @@ decl_error! {
 		ClaimNotExist,
 
 		NotClaimOwner,
+
+		ProofTooLong,
 	}
 }
 
@@ -116,6 +121,8 @@ decl_module! {
 		pub fn create_claim(origin, claim: Vec<u8>) -> dispatch::DispatchResult {
 			let sender = ensure_signed(origin)?;
 			ensure!(!Proofs::<T>::contains_key(&claim),Error::<T>::ProofAlreadyExist);
+			//附加题答案
+			ensure!(T::MaxClaimLength::get() >= claim.len() as u32,Error::<T>::ProofTooLong);
 			Proofs::<T>::insert(&claim,(sender.clone(),system::Module::<T>::block_number()));
 			Self::deposit_event(RawEvent::ClaimCreated(sender,claim));
 			Ok(())
