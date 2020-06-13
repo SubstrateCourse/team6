@@ -258,8 +258,13 @@ impl template::Trait for Runtime {
 	type Event = Event;
 }
 
+parameter_types! {
+	pub const MaxClaimLength: u32 = 6;
+}
+
 impl poe::Trait for Runtime {
 	type Event = Event;
+	type MaxClaimLength = MaxClaimLength;
 }
 
 construct_runtime!(
