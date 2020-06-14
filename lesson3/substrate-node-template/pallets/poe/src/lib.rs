@@ -1,7 +1,5 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
-/// A FRAME pallet proof of existence with necessary imports
-
 use frame_support::{
 	decl_module, decl_storage, decl_event, decl_error, dispatch, ensure,
 	traits::{Get},
@@ -20,13 +18,12 @@ mod tests;
 /// The pallet's configuration trait.
 pub trait Trait: system::Trait {
 	// Add other types and constants required to configure this pallet.
-	type Currency: Currency<Self::AccountId>;
-
 	/// The overarching event type.
 	type Event: From<Event<Self>> + Into<<Self as system::Trait>::Event>;
 
-	// 附加题答案
 	type MaxClaimLength: Get<u32>;
+
+	type Currency: Currency<Self::AccountId>;
 }
 
 type BalanceOf<T> = <<T as Trait>::Currency as Currency<<T as system::Trait>::AccountId>>::Balance;
