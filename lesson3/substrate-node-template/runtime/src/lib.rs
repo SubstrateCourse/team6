@@ -9,6 +9,10 @@
 include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 
 use sp_std::prelude::*;
+use grandpa::fg_primitives;
+use grandpa::{AuthorityId as GrandpaId, AuthorityList as GrandpaAuthorityList};
+use sp_api::impl_runtime_apis;
+use sp_consensus_aura::sr25519::AuthorityId as AuraId;
 use sp_core::{crypto::KeyTypeId, OpaqueMetadata};
 use sp_runtime::{
 	ApplyExtrinsicResult, generic, create_runtime_str, impl_opaque_keys, MultiSignature,
@@ -17,13 +21,9 @@ use sp_runtime::{
 use sp_runtime::traits::{
 	BlakeTwo256, Block as BlockT, IdentityLookup, Verify, IdentifyAccount, NumberFor, Saturating,
 };
-use sp_api::impl_runtime_apis;
-use sp_consensus_aura::sr25519::AuthorityId as AuraId;
-use grandpa::{AuthorityId as GrandpaId, AuthorityList as GrandpaAuthorityList};
-use grandpa::fg_primitives;
-use sp_version::RuntimeVersion;
 #[cfg(feature = "std")]
 use sp_version::NativeVersion;
+use sp_version::RuntimeVersion;
 
 // A few exports that help ease life for downstream crates.
 #[cfg(any(feature = "std", test))]
@@ -35,10 +35,12 @@ pub use frame_support::{
 	construct_runtime, parameter_types, StorageValue,
 	traits::{KeyOwnerProofSystem, Randomness},
 	weights::{
-		Weight, IdentityFee,
 		constants::{BlockExecutionWeight, ExtrinsicBaseWeight, RocksDbWeight, WEIGHT_PER_SECOND},
+		IdentityFee, Weight,
 	},
 };
+
+#[cfg(any(feature = "std", test))]
 
 /// Importing a template pallet
 pub use template;
@@ -259,11 +261,13 @@ impl template::Trait for Runtime {
 
 // 附加题答案
 parameter_types! {
-	pub const MaxClaimLength: u32 = 6;
+	pub const MaxClaimLength: u32 = 256;
 }
 
 impl poe::Trait for Runtime {
 	type Event = Event;
+
+	type Currency = Balances;
 	
 	// 附加题答案
 	type MaxClaimLength = MaxClaimLength;
