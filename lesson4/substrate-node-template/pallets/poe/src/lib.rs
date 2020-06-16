@@ -87,6 +87,7 @@ decl_module! {
             ensure!(s == sender, Error::<T>::NotOwner);
 
             Proofs::<T>::remove(&claim);
+            Owners::<T>::remove(sender.clone(), &claim);
             Prices::<T>::remove(&claim);
 
             Self::deposit_event(RawEvent::ClaimRevoked(sender, claim));
