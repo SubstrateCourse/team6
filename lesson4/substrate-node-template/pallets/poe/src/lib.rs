@@ -6,7 +6,7 @@ use frame_support::traits::{Currency, ExistenceRequirement};
 use frame_system::{self as system, ensure_signed};
 use sp_std::prelude::*;
 use sp_runtime::traits::{StaticLookup};
-use timestamp;
+use pallet_timestamp as timestamp;
 
 #[cfg(test)]
 mod mock;
@@ -34,8 +34,9 @@ decl_event!(
 	pub enum Event<T> where 
         AccountId = <T as system::Trait>::AccountId,
         Balance = BalanceOf<T>,
+        Moment = <T as timestamp::Trait>::Moment,
     {
-        ClaimCreated(AccountId, Vec<u8>, Balance, u64, Option<Vec<u8>>),
+        ClaimCreated(AccountId, Vec<u8>, Balance, Moment, Option<Vec<u8>>),
         ClaimRevoked(AccountId, Vec<u8>),
         ClaimTransfered(AccountId, Vec<u8>),
         ClaimBuyed(AccountId, Vec<u8>, Balance),
