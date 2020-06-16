@@ -35,12 +35,14 @@ decl_event!(
         AccountId = <T as system::Trait>::AccountId,
         Balance = BalanceOf<T>,
         Moment = <T as timestamp::Trait>::Moment,
+        BlockNumber = <T as system::Trait>::BlockNumber,
     {
         ClaimCreated(AccountId, Vec<u8>, Balance, Moment, Option<Vec<u8>>),
         ClaimRevoked(AccountId, Vec<u8>),
         ClaimTransfered(AccountId, Vec<u8>),
         ClaimBuyed(AccountId, Vec<u8>, Balance),
         PriceSet(AccountId, Vec<u8>, Balance),
+        ListClaim(AccountId, Vec<(AccountId, Vec<u8>, BlockNumber, Moment, Option<Vec<u8>>)>),
     }
 );
 
@@ -145,14 +147,30 @@ decl_module! {
 
             T::Currency::transfer(&sender, &owner, price, ExistenceRequirement::AllowDeath)?;
 
-
-
             Proofs::<T>::insert(&claim, (&sender, system::Module::<T>::block_number(), time_stamp, &note));
             Owners::<T>::remove(owner.clone(), &claim);
             Owners::<T>::insert(sender.clone(), &claim, (sender.clone(), &claim, system::Module::<T>::block_number(), &time_stamp, &note));
             Prices::<T>::insert(&claim, &in_price);
 
             Self::deposit_event(RawEvent::ClaimBuyed(sender, claim, price));
+
+            Ok(())
+        }
+
+
+        #[weight = 100]
+        pub fn get_claimlist(origin, receiver: <T::Lookup as StaticLookup>::Source) -> dispatch::DispatchResult  {
+        
+            let sender = ensure_signed(origin)?;
+            let acc = T::Lookup::lookup(receiver)?;
+
+            let mut v: Vec<(T::AccountId, Vec<u8>, T::BlockNumber, T::Moment, Option<Vec<u8>>)> = Vec::new();
+            
+            for item in Owners::<T>::iter_prefix_values(&acc){
+                v.push(item);
+            }
+            
+            Self::deposit_event(RawEvent::ListClaim(&acc, v));
 
             Ok(())
         }
