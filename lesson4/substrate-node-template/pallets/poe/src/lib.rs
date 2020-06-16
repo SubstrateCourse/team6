@@ -25,6 +25,7 @@ decl_storage! {
 	trait Store for Module<T: Trait> as PoeModule {
         Proofs get(fn proofs): map hasher(blake2_128_concat) Vec<u8> => (T::AccountId, T::BlockNumber, u64, Option<Vec<u8>>);
         Prices get(fn price): map hasher(blake2_128_concat) Vec<u8> => BalanceOf<T>;
+        Owners get(fn owners): double_map hasher(blake2_128_concat) T::AccountId, hasher(blake2_128_concat) Vec<u8> => (T::AccountId, T::BlockNumber, u64, Option<Vec<u8>>);
 	}
 }
 
@@ -66,11 +67,12 @@ decl_module! {
 
             ensure!(claim.len() as u32 <= T::MaxClaimLength::get(), Error::<T>::LengthTooLong);
 
-            Proofs::<T>::insert(&claim, (sender.clone(), system::Module::<T>::block_number(), timestamp, &note));
-            
+            Proofs::<T>::insert(&claim, (sender.clone(), system::Module::<T>::block_number(), &timestamp, &note));
+            Owners::<T>::insert(sender.clone(), &claim, (sender.clone(), system::Module::<T>::block_number(), &timestamp, &note));
+
             let price: BalanceOf<T> = 0.into();
             Prices::<T>::insert(&claim, &price);
-
+            
             Self::deposit_event(RawEvent::ClaimCreated(sender, claim, price, timestamp, note));
 
             Ok(())
@@ -102,7 +104,9 @@ decl_module! {
 
             let dest = T::Lookup::lookup(receiver)?;
 
-            Proofs::<T>::insert(&claim, (dest, system::Module::<T>::block_number(), timestamp, note));
+            Proofs::<T>::insert(&claim, (dest.clone(), system::Module::<T>::block_number(), timestamp, &note));
+            Owners::<T>::remove(sender.clone(), &claim);
+            Owners::<T>::insert(dest.clone(), &claim, (dest.clone(), system::Module::<T>::block_number(), &timestamp, &note));
 
             Self::deposit_event(RawEvent::ClaimRevoked(sender, claim));
 
@@ -137,7 +141,9 @@ decl_module! {
 
             T::Currency::transfer(&sender, &owner, price, ExistenceRequirement::AllowDeath)?;
 
-            Proofs::<T>::insert(&claim, (&sender, system::Module::<T>::block_number(), timestamp, note));
+            Proofs::<T>::insert(&claim, (&sender, system::Module::<T>::block_number(), timestamp, &note));
+            Owners::<T>::remove(owner.clone(), &claim);
+            Owners::<T>::insert(sender.clone(), &claim, (sender.clone(), system::Module::<T>::block_number(), &timestamp, &note));
             Prices::<T>::insert(&claim, &in_price);
 
             Self::deposit_event(RawEvent::ClaimBuyed(sender, claim, price));
