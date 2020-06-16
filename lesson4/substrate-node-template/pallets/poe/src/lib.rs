@@ -24,7 +24,7 @@ type BalanceOf<T> = <<T as Trait>::Currency as Currency<<T as system::Trait>::Ac
 
 decl_storage! {
 	trait Store for Module<T: Trait> as PoeModule {
-        Proofs get(fn proofs): map hasher(blake2_128_concat) Vec<u8> => (T::AccountId, T::BlockNumber, T::Moment, Option<Vec<u8>>);
+        Proofs get(fn proofs): map hasher(blake2_128_concat) Vec<u8> => (T::AccountId, Vec<u8>, T::BlockNumber, T::Moment, Option<Vec<u8>>);
         Prices get(fn price): map hasher(blake2_128_concat) Vec<u8> => BalanceOf<T>;
         Owners get(fn owners): double_map hasher(blake2_128_concat) T::AccountId, hasher(blake2_128_concat) Vec<u8> => (T::AccountId, Vec<u8>, T::BlockNumber, T::Moment, Option<Vec<u8>>);
 	}
@@ -42,7 +42,8 @@ decl_event!(
         ClaimTransfered(AccountId, Vec<u8>),
         ClaimBuyed(AccountId, Vec<u8>, Balance),
         PriceSet(AccountId, Vec<u8>, Balance),
-        ListClaim(AccountId, Vec<(AccountId, Vec<u8>, BlockNumber, Moment, Option<Vec<u8>>)>),
+        DebugAccount(AccountId),
+        DebugLen(u32),
         ListOneClaim(AccountId, Vec<u8>, BlockNumber, Moment, Option<Vec<u8>>),
     }
 );
@@ -73,7 +74,7 @@ decl_module! {
             ensure!(claim.len() as u32 <= T::MaxClaimLength::get(), Error::<T>::LengthTooLong);
 
             let time_stamp = <timestamp::Module<T>>::get();
-            Proofs::<T>::insert(&claim, (sender.clone(), system::Module::<T>::block_number(), &time_stamp, &note));
+            Proofs::<T>::insert(&claim, (sender.clone(), &claim, system::Module::<T>::block_number(), &time_stamp, &note));
             Owners::<T>::insert(sender.clone(), &claim, (sender.clone(), &claim, system::Module::<T>::block_number(), &time_stamp, &note));
 
             let price: BalanceOf<T> = 0.into();
@@ -89,7 +90,7 @@ decl_module! {
             let sender = ensure_signed(origin)?;
             ensure!(Proofs::<T>::contains_key(&claim), Error::<T>::ClaimNotExist);
 
-            let (s, _, _, _) = Proofs::<T>::get(&claim);
+            let (s, _, _, _, _) = Proofs::<T>::get(&claim);
             ensure!(s == sender, Error::<T>::NotOwner);
 
             Proofs::<T>::remove(&claim);
@@ -106,12 +107,12 @@ decl_module! {
             let sender = ensure_signed(origin)?;
             ensure!(Proofs::<T>::contains_key(&claim), Error::<T>::ClaimNotExist);
 
-            let (s, _, time_stamp, note) = Proofs::<T>::get(&claim);
+            let (s, _, _, time_stamp, note) = Proofs::<T>::get(&claim);
             ensure!(s == sender, Error::<T>::NotOwner);
 
             let dest = T::Lookup::lookup(receiver)?;
 
-            Proofs::<T>::insert(&claim, (dest.clone(), system::Module::<T>::block_number(), time_stamp, &note));
+            Proofs::<T>::insert(&claim, (dest.clone(), &claim, system::Module::<T>::block_number(), time_stamp, &note));
             Owners::<T>::remove(sender.clone(), &claim);
             Owners::<T>::insert(dest.clone(), &claim, (dest.clone(), &claim, system::Module::<T>::block_number(), &time_stamp, &note));
 
@@ -125,7 +126,7 @@ decl_module! {
             let sender = ensure_signed(origin)?;
             ensure!(Proofs::<T>::contains_key(&claim), Error::<T>::ClaimNotExist);
 
-            let (s, _, _, _) = Proofs::<T>::get(&claim);
+            let (s, _, _, _, _) = Proofs::<T>::get(&claim);
             ensure!(s == sender, Error::<T>::NotOwner);
 
             Prices::<T>::insert(&claim, &price);
@@ -140,7 +141,7 @@ decl_module! {
             let sender = ensure_signed(origin)?;
             ensure!(Proofs::<T>::contains_key(&claim), Error::<T>::ClaimNotExist);
 
-            let (owner, _, time_stamp, note) = Proofs::<T>::get(&claim);
+            let (owner, _, _, time_stamp, note) = Proofs::<T>::get(&claim);
             ensure!(owner != sender, Error::<T>::BuyOwnClaim);
 
             let price = Prices::<T>::get(&claim);
@@ -148,7 +149,7 @@ decl_module! {
 
             T::Currency::transfer(&sender, &owner, price, ExistenceRequirement::AllowDeath)?;
 
-            Proofs::<T>::insert(&claim, (&sender, system::Module::<T>::block_number(), time_stamp, &note));
+            Proofs::<T>::insert(&claim, (&sender, &claim, system::Module::<T>::block_number(), time_stamp, &note));
             Owners::<T>::remove(owner.clone(), &claim);
             Owners::<T>::insert(sender.clone(), &claim, (sender.clone(), &claim, system::Module::<T>::block_number(), &time_stamp, &note));
             Prices::<T>::insert(&claim, &in_price);
@@ -165,7 +166,10 @@ decl_module! {
             let sender = ensure_signed(origin)?;
             let acc = T::Lookup::lookup(receiver)?;
 
-            for item in Owners::<T>::iter_prefix_values(&acc){
+            Self::deposit_event(RawEvent::DebugAccount(acc.clone()));
+
+            for item in Owners::<T>::iter_prefix(acc.clone()){
+                Self::deposit_event(RawEvent::DebugLen(1));
                 Self::deposit_event(RawEvent::ListOneClaim(item.0, item.1, item.2, item.3, item.4));
             }
 
