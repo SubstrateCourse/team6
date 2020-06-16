@@ -43,6 +43,7 @@ decl_event!(
         ClaimBuyed(AccountId, Vec<u8>, Balance),
         PriceSet(AccountId, Vec<u8>, Balance),
         ListClaim(AccountId, Vec<(AccountId, Vec<u8>, BlockNumber, Moment, Option<Vec<u8>>)>),
+        ListOneClaim(AccountId, Vec<u8>, BlockNumber, Moment, Option<Vec<u8>>),
     }
 );
 
@@ -164,13 +165,9 @@ decl_module! {
             let sender = ensure_signed(origin)?;
             let acc = T::Lookup::lookup(receiver)?;
 
-            let mut v: Vec<(T::AccountId, Vec<u8>, T::BlockNumber, T::Moment, Option<Vec<u8>>)> = Vec::new();
-            
             for item in Owners::<T>::iter_prefix_values(&acc){
-                v.push(item);
+                Self::deposit_event(RawEvent::ListOneClaim(item.0, item.1, item.2, item.3, item.4));
             }
-            
-            Self::deposit_event(RawEvent::ListClaim(&acc, v));
 
             Ok(())
         }
