@@ -15,6 +15,7 @@ function Main (props) {
   const [owner, setOwner] = useState('');
   const [blockNumber, setBlockNumber] = useState(0);
   const [accountId] = useState('');
+  const [notes] = useState('');
 
 
   useEffect(() => {
@@ -60,6 +61,15 @@ function Main (props) {
             lable='Your File'
             onChange={(e) => handleFileChosen(e.target.files[0])}
           />
+
+        <Input
+            fluid
+            label='Notes'
+            type='text'
+            placeholder='Notes for proofs'
+            state='notes'
+          />
+
         </Form.Field>
         <Form.Field>
           <TxButton
@@ -74,6 +84,20 @@ function Main (props) {
               paramFields: [true]
             }}
           />
+
+        <TxButton
+            accountPair = {accountPair}
+            label='Create Claim With Notes'
+            setStatus={setStatus}
+            type='SIGNED-TX'
+            attrs={{
+              palletRpc: 'poeModule',
+              callable: 'createClaimWithNotes',
+              inputParams: [digest, notes],
+              paramFields: [true]
+            }}
+          />
+
           <TxButton
             accountPair = {accountPair}
             label='Revoke Claim'

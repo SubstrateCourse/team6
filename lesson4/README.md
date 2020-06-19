@@ -32,3 +32,10 @@ function getDocInfoFromAddr(addr) {
   // }, {}, ...]
 }
 ```
+
+
+
+
+
+![作业截图](https://img.learnblockchain.cn/pics/20200619083536.jpg)
+

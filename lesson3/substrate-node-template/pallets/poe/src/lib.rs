@@ -33,7 +33,8 @@ decl_storage! {
 	// storage items are isolated from other pallets.
 	// ---------------------------------vvvvvvvvvvvvvv
 	trait Store for Module<T: Trait> as TemplateModule {
-		Proofs get(fn proofs): map hasher(blake2_128_concat) Vec<u8> => (T::AccountId, T::BlockNumber);
+    Proofs get(fn proofs): map hasher(blake2_128_concat) Vec<u8> => (T::AccountId, T::BlockNumber);
+    ProofNotes get(fn proofnotes): map hasher(blake2_128_concat) Vec<u8> => (T::AccountId, T::BlockNumber, Vec<u8>);
 	}
 }
 
@@ -82,7 +83,24 @@ decl_module! {
 			Self::deposit_event(RawEvent::ClaimCreated(sender, claim));
 
 			Ok(())
-		}
+    }
+    
+    #[weight = 0]
+    pub fn create_claim_with_notes(origin, claim: Vec<u8>, notes: Vec<u8>) -> dispatch::DispatchResult {
+
+      let sender = ensure_signed(origin)?;
+
+			ensure!(!ProofNotes::<T>::contains_key(&claim), Error::<T>::ProofAlreadyExist);
+
+			// 附加题答案
+			ensure!(T::MaxClaimLength::get() >= claim.len() as u32, Error::<T>::ProofTooLong);
+
+			ProofNotes::<T>::insert(&claim, (sender.clone(), system::Module::<T>::block_number(),  notes) );
+
+			Self::deposit_event(RawEvent::ClaimCreated(sender, claim));
+
+			Ok(())
+    }
 
 		#[weight = 0]
 		pub fn revoke_claim(origin, claim: Vec<u8>) -> dispatch::DispatchResult {
