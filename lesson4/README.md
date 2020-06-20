@@ -35,7 +35,7 @@
     cd client
     yarn install
     yarn submitDocInfo <your-file-path> <comment>
-    ``` 
+    ```
 
 #### 附加题(5分) - 本次附加题为必答题
 
@@ -67,3 +67,11 @@ cd client
 yarn install
 yarn getUserDocs <user-account>
 ```
+
+
+
+运行效果图
+
+![image-20200620151404334](./images/image-20200620151404334.png)
+
+![image-20200620151248802](./images/image-20200620151248802.png)
