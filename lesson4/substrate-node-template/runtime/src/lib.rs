@@ -257,13 +257,15 @@ impl template::Trait for Runtime {
 }
 
 parameter_types! {
-    pub const MaxClaimLength: u32 = 256; 
+		pub const MaxClaimLength: u32 = 256; 
+		pub const MaxClaimNoteLength: u32 = 256;
 }
 
 impl poe::Trait for Runtime {
 	type Event = Event;
     type Currency = balances::Module<Runtime>;
-    type MaxClaimLength = MaxClaimLength;
+		type MaxClaimLength = MaxClaimLength;
+		type MaxClaimNoteLength = MaxClaimNoteLength;
 }
 
 construct_runtime!(

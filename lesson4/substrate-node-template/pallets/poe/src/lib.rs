@@ -18,6 +18,7 @@ pub trait Trait: system::Trait + timestamp::Trait {
 	type Event: From<Event<Self>> + Into<<Self as system::Trait>::Event>;
     type Currency: Currency<Self::AccountId>;
     type MaxClaimLength: Get<u32>;
+    type MaxClaimNoteLength: Get<u32>;
 }
 
 type BalanceOf<T> = <<T as Trait>::Currency as Currency<<T as system::Trait>::AccountId>>::Balance;
@@ -57,6 +58,7 @@ decl_error! {
         BuyOwnClaim,
         PriceIsZero,
         PriceTooLow,
+        NoteTooLong
     }
 }
 
@@ -72,6 +74,8 @@ decl_module! {
             ensure!(!Proofs::<T>::contains_key(&claim), Error::<T>::ProofAlreadyExist);
 
             ensure!(claim.len() as u32 <= T::MaxClaimLength::get(), Error::<T>::LengthTooLong);
+            //判断备注不超过256
+			ensure!(T::MaxClaimNoteLength::get() >= note.len() as u32, Error::<T>::NoteTooLong);
 
             let time_stamp = <timestamp::Module<T>>::get();
             Proofs::<T>::insert(&claim, (sender.clone(), &claim, system::Module::<T>::block_number(), &time_stamp, &note));
