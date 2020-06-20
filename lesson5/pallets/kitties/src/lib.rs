@@ -51,6 +51,7 @@ decl_module! {
 			let kitty = Kitty(dna);
 
 			// 作业：补完剩下的部分
+			Self::insert_kitty(sender, kitty_id, kitty);
 		}
 
 		/// Breed kitties
@@ -70,6 +71,13 @@ fn combine_dna(dna1: u8, dna2: u8, selector: u8) -> u8 {
 impl<T: Trait> Module<T> {
 	fn random_value(sender: &T::AccountId) -> [u8; 16] {
 		// 作业：完成方法
+		let payload = (
+			<pallet_randomness_collective_flip::Module<T> as Randomness<T::Hash>>::random_seed(),
+			sender,
+			<frame_system::Module<T>>::extrinsic_index(),
+		);
+		let dna = payload.using_encoded(blake2_128);
+		dna
 	}
 
 	fn next_kitty_id() -> sp_std::result::Result<u32, DispatchError> {
@@ -82,6 +90,12 @@ impl<T: Trait> Module<T> {
 
 	fn insert_kitty(owner: T::AccountId, kitty_id: u32, kitty: Kitty) {
 		// 作业：完成方法
+		Kitties::insert(kitty_id, kitty);
+		KittiesCount::put(kitty_id + 1);
+
+		let user_kitties_id = Self::owned_kitties_count(&owner);
+		<OwnedKitties<T>>::insert((&owner, user_kitties_id), kitty_id);
+		<OwnedKittiesCount<T>>::insert(&owner, user_kitties_id + 1);
 	}
 
 	fn do_breed(sender: T::AccountId, kitty_id_1: u32, kitty_id_2: u32) -> DispatchResult {
