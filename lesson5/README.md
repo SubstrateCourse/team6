@@ -123,3 +123,49 @@ git checkout <branch/tag/sha1>
 
 Noted though you will likely get faster and more thorough support if you stick with the releases
 provided in this repository.
+#################################################################################################
+# 赠予小猫设计
+## 数据结构
+数据结构可以使用链表存储，某个用户所以的小猫
+pub OwnedKitties get(owned_kitties): map (T::AccountId, Option<T::KittyIndex>) => Option<KittyLinkedItem<T>>;
+
+（pre为上个小猫的下标， net为下个小猫的下标， 内容为小猫的dna信息）
+且使用下标可以直接索引到小猫所在的item
+删除为O(1) 插入为O(1)
+
+## 伪代码
+判断当前用户是否已验证合法
+判断当前用户拥有猫
+判断当前转账地址from != to
+
+from地址里面删除小猫
+to地址增加小猫
+from地址的小猫数量-1
+to地址的小猫数量+1
+
+# 简单交易功能
+
+## 数据结构
+重构Kitty，设置为结构体
+{
+  dna: [u8; 16],
+  price: u32,
+}
+
+## 伪代码
+### 定价
+判断当前用户是否已验证合法
+判断是否小猫拥有者
+小猫的price字段赋值为新价格
+
+### 购买
+判断当前用户是否已验证合法
+判断当前当前账号余额是否大于等于猫的价格
+
+购买者余额 -= 猫的价格
+卖家余额 += 猫的价格
+
+卖家地址删除小猫
+卖家小猫数量-1
+购买者地址增加小猫
+购买者小猫数量+1
