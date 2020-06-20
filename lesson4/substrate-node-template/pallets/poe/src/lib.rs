@@ -73,12 +73,16 @@ decl_module! {
             let sender = ensure_signed(origin)?;
             ensure!(!Proofs::<T>::contains_key(&claim), Error::<T>::ProofAlreadyExist);
 
-            ensure!(claim.len() as u32 <= T::MaxClaimLength::get(), Error::<T>::LengthTooLong);
-            //判断备注不超过256
-			ensure!(T::MaxClaimNoteLength::get() >= note.len() as u32, Error::<T>::NoteTooLong);
+
+            match note.clone() {
+                Option::Some(x) => 
+                    ensure!(x.clone().len() as u32 <= T::MaxClaimLength::get(), Error::<T>::LengthTooLong),
+                Option::None =>
+                    ()
+            }
 
             let time_stamp = <timestamp::Module<T>>::get();
-            Proofs::<T>::insert(&claim, (sender.clone(), &claim, system::Module::<T>::block_number(), &time_stamp, &note));
+            Proofs::<T>::insert(&claim, (sender.clone(), &claim, system::Module::<T>::block_number(), &time_stamp, note.clone()));
 
             let mut v_sender= Owners::<T>::get(sender.clone());
             v_sender.push(claim.clone());
