@@ -33,7 +33,8 @@ decl_storage! {
 	// storage items are isolated from other pallets.
 	// ---------------------------------vvvvvvvvvvvvvv
 	trait Store for Module<T: Trait> as TemplateModule {
-		Proofs get(fn proofs): map hasher(blake2_128_concat) Vec<u8> => (T::AccountId, T::BlockNumber);
+		Proofs get(fn proofs): map hasher(blake2_128_concat) Vec<u8> => (Vec<u8>, T::AccountId, T::BlockNumber);
+		ProofByAcct get(fn proofbyacct): map hasher(blake2_128_concat) T::AccountId => Vec<(Vec<u8>, Vec<u8>, T::BlockNumber)>;
 	}
 }
 
@@ -52,6 +53,7 @@ decl_error! {
 		ClaimNotExist,
 		NotClaimOwner,
 		ProofTooLong,
+		MemoTooLong,
 	}
 }
 
@@ -69,54 +71,27 @@ decl_module! {
 		fn deposit_event() = default;
 
 		#[weight = 0]
-		pub fn create_claim(origin, claim: Vec<u8>) -> dispatch::DispatchResult {
+		pub fn create_claim(origin, claim: Vec<u8>, memo: Vec<u8>) -> dispatch::DispatchResult {
 			let sender = ensure_signed(origin)?;
 
 			ensure!(!Proofs::<T>::contains_key(&claim), Error::<T>::ProofAlreadyExist);
 
 			// 附加题答案
 			ensure!(T::MaxClaimLength::get() >= claim.len() as u32, Error::<T>::ProofTooLong);
+			ensure!(memo.len() <= 256, Error::<T>::MemoTooLong);
 
-			Proofs::<T>::insert(&claim, (sender.clone(), system::Module::<T>::block_number()));
+			Proofs::<T>::insert(&claim, (&memo, sender.clone(), system::Module::<T>::block_number()));
+			// ProofByAcct::<T>::insert(sender.clone(), (memo, &claim, system::Module::<T>::block_number()));
+
+
+			let mut list = ProofByAcct::<T>::get(sender.clone());
+			list.push((claim.clone(), memo.clone(), system::Module::<T>::block_number()));
+			ProofByAcct::<T>::insert(sender.clone(), list);
 
 			Self::deposit_event(RawEvent::ClaimCreated(sender, claim));
 
 			Ok(())
 		}
 
-		#[weight = 0]
-		pub fn revoke_claim(origin, claim: Vec<u8>) -> dispatch::DispatchResult {
-			let sender = ensure_signed(origin)?;
-
-			ensure!(Proofs::<T>::contains_key(&claim), Error::<T>::ClaimNotExist);
-
-			let (owner, _block_number) = Proofs::<T>::get(&claim);
-
-			ensure!(owner == sender, Error::<T>::NotClaimOwner);
-
-			Proofs::<T>::remove(&claim);
-
-			Self::deposit_event(RawEvent::ClaimRevoked(sender, claim));
-
-			Ok(())
-		}
-
-		// 第二题答案
-		#[weight = 0]
-		pub fn transfer_claim(origin, claim: Vec<u8>, dest: <T::Lookup as StaticLookup>::Source) -> dispatch::DispatchResult {
-			let sender = ensure_signed(origin)?;
-
-			ensure!(Proofs::<T>::contains_key(&claim), Error::<T>::ClaimNotExist);
-
-			let (owner, _block_number) = Proofs::<T>::get(&claim);
-
-			ensure!(owner == sender, Error::<T>::NotClaimOwner);
-
-			let dest = T::Lookup::lookup(dest)?;
-
-			Proofs::<T>::insert(&claim, (dest, system::Module::<T>::block_number()));
-
-			Ok(())
-		}
 	}
 }

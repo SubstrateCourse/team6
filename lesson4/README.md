@@ -67,3 +67,5 @@ cd client
 yarn install
 yarn getUserDocs <user-account>
 ```
+作业完成效果图：
+![screenshot](./screenshot.png)
