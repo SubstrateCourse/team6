@@ -26,8 +26,8 @@ decl_storage! {
 	trait Store for Module<T: Trait> as PoeModule {
         Proofs get(fn proofs): map hasher(blake2_128_concat) Vec<u8> => (T::AccountId, Vec<u8>, T::BlockNumber, T::Moment, Option<Vec<u8>>);
         Prices get(fn price): map hasher(blake2_128_concat) Vec<u8> => BalanceOf<T>;
-        Owners get(fn owners): double_map hasher(blake2_128_concat) T::AccountId, hasher(blake2_128_concat) Vec<u8> => (T::AccountId, Vec<u8>, T::BlockNumber, T::Moment, Option<Vec<u8>>);
-	}
+        Owners get(fn owners): map hasher(blake2_128_concat) T::AccountId => Vec<Vec<u8>>;
+    }
 }
 
 decl_event!(
@@ -75,7 +75,10 @@ decl_module! {
 
             let time_stamp = <timestamp::Module<T>>::get();
             Proofs::<T>::insert(&claim, (sender.clone(), &claim, system::Module::<T>::block_number(), &time_stamp, &note));
-            Owners::<T>::insert(sender.clone(), &claim, (sender.clone(), &claim, system::Module::<T>::block_number(), &time_stamp, &note));
+
+            let mut v_sender= Owners::<T>::get(sender.clone());
+            v_sender.push(claim.clone());
+            Owners::<T>::insert(sender.clone(), &v_sender);
 
             let price: BalanceOf<T> = 0.into();
             Prices::<T>::insert(&claim, &price);
@@ -94,7 +97,10 @@ decl_module! {
             ensure!(s == sender, Error::<T>::NotOwner);
 
             Proofs::<T>::remove(&claim);
-            Owners::<T>::remove(sender.clone(), &claim);
+
+            let mut v_sender= Owners::<T>::get(sender.clone());
+            v_sender.retain(|x| !x.iter().eq(claim.clone().iter()));
+            Owners::<T>::insert(sender.clone(), &v_sender);
             Prices::<T>::remove(&claim);
 
             Self::deposit_event(RawEvent::ClaimRevoked(sender, claim));
@@ -113,8 +119,15 @@ decl_module! {
             let dest = T::Lookup::lookup(receiver)?;
 
             Proofs::<T>::insert(&claim, (dest.clone(), &claim, system::Module::<T>::block_number(), time_stamp, &note));
-            Owners::<T>::remove(sender.clone(), &claim);
-            Owners::<T>::insert(dest.clone(), &claim, (dest.clone(), &claim, system::Module::<T>::block_number(), &time_stamp, &note));
+
+            let mut v_sender= Owners::<T>::get(sender.clone());
+            //let temp = claim.clone();
+            v_sender.retain(|x| !x.iter().eq(claim.clone().iter()));
+            Owners::<T>::insert(sender.clone(), &v_sender);
+
+            let mut v_dist = Owners::<T>::get(dest.clone());
+            v_dist.push(claim.clone());
+            Owners::<T>::insert(dest.clone(), &v_dist);
 
             Self::deposit_event(RawEvent::ClaimRevoked(sender, claim));
 
@@ -150,8 +163,13 @@ decl_module! {
             T::Currency::transfer(&sender, &owner, price, ExistenceRequirement::AllowDeath)?;
 
             Proofs::<T>::insert(&claim, (&sender, &claim, system::Module::<T>::block_number(), time_stamp, &note));
-            Owners::<T>::remove(owner.clone(), &claim);
-            Owners::<T>::insert(sender.clone(), &claim, (sender.clone(), &claim, system::Module::<T>::block_number(), &time_stamp, &note));
+            let mut v_owner= Owners::<T>::get(owner.clone());
+            v_owner.retain(|x| !x.iter().eq(claim.clone().iter()));
+            Owners::<T>::insert(owner.clone(), &v_owner);
+
+            let mut v_sender = Owners::<T>::get(sender.clone());
+            v_sender.push(claim.clone());
+            Owners::<T>::insert(sender.clone(), &v_sender);
             Prices::<T>::insert(&claim, &in_price);
 
             Self::deposit_event(RawEvent::ClaimBuyed(sender, claim, price));
@@ -168,9 +186,10 @@ decl_module! {
 
             Self::deposit_event(RawEvent::DebugAccount(acc.clone()));
 
-            for item in Owners::<T>::iter_prefix(acc.clone()){
+            for item in Owners::<T>::get(acc.clone()){
+                let v = Proofs::<T>::get(&item);
                 Self::deposit_event(RawEvent::DebugLen(1));
-                Self::deposit_event(RawEvent::ListOneClaim(item.0, item.1, item.2, item.3, item.4));
+                Self::deposit_event(RawEvent::ListOneClaim(v.0, v.1, v.2, v.3, v.4));
             }
 
             Ok(())
