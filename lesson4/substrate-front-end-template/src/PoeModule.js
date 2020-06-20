@@ -6,6 +6,7 @@ import { TxButton } from './substrate-lib/components';
 import { blake2AsHex } from '@polkadot/util-crypto';
 import { keyring } from '@polkadot/keyring';
 
+
 function Main(props) {
   const { api } = useSubstrate();
   const { accountPair } = props;
@@ -20,13 +21,18 @@ function Main(props) {
   const [claimlistAccountId, setclaimlistAccountId] = useState('');
   const [claimlist, setClaimlist] = useState([]);
   const [sucessinfo, setSucessinfo] = useState('');
+  const convert = (from, to) => str => Buffer.from(str, from).toString(to)
+  const utf8ToHex = convert('utf8', 'hex')
+  const hexToUtf8 = convert('hex', 'utf8')
+  let list_info  = []
+  
 
   useEffect(() => {
-    console.log(keyring);
     let unsubscribe;
+    
     api.query.poeModule.proofs(digest, result => {
       setOwner(result[0].toString())
-      setBlockNumber(result[1].toNumber())
+      //setBlockNumber(result[1].toNumber())
     }).then(unsub => {
       unsubscribe = unsub;
     })
@@ -50,35 +56,13 @@ function Main(props) {
     fileReader.onloadend = bufferToDigest;
     fileReader.readAsArrayBuffer(file);
   }
+  
 
   async function getUserDocs(acct) {
     setClaimlist('')
+    list_info = []
 
-    // const unsub = await api.tx.poeModule.getClaimlist(claimlistAccountId).signAndSend(accountPair, (result) => {
-    //     const {status, events} = result;
-    //     console.log(status);
-    //     console.log(events);
-
-    //     if (result.status.isInBlock) {
-    //       console.log(`Transaction included at blockHash ${result.status.asInBlock}`);
-    //     } else if (result.status.isFinalized) {
-    //       console.log(`Transaction finalized at blockHash ${result.status.asFinalized}`);
-
-
-    //       // Loop through Vec<EventRecord> to display all events
-    //       events.forEach(({ phase, event: { data, method, section } }) => {
-    //         console.log(`\t' ${phase}: ${section}.${method}:: ${data}`);
-    //       });
-
-    //       unsub();
-    //     }
-
-    //   }).catch(err => {
-
-    //   });
-
-
-        const unsub = await api.tx.poeModule.setPrice('0x6e81898fea8e3c0f453e4b0bd1c5ad5b227379d2923481e2bdde371e3eb1280c', 11).signAndSend(accountPair, (result) => {
+    const unsub = await api.tx.poeModule.getClaimlist(claimlistAccountId).signAndSend(accountPair, (result) => {
         const {status, events} = result;
         console.log(status);
         console.log(events);
@@ -91,11 +75,32 @@ function Main(props) {
 
           // Loop through Vec<EventRecord> to display all events
           events.forEach(({ phase, event: { data, method, section } }) => {
-            console.log('PriceSet' === method);
+
+            console.log('ListOneClaim' === method);
             console.log(method, typeof(method));
             console.log(`\t' ${phase}: ${section}.${method}:: ${data}`);
-          });
+            console.log(`${data}`);
+            console.log(data.toJSON());
 
+
+
+            if ('ListOneClaim' === method) {
+              list_info.push(data.toJSON())
+            }
+            if ('ExtrinsicSuccess' == method) {
+              let tmp = "";
+              tmp += "{";
+              for (var index =0; index < list_info.length; index++) {
+                let item = list_info[index];
+                console.log(list_info);
+                console.log(typeof(item[4]))
+                let note = hexToUtf8(item[4].substr(2));
+                tmp += `${item[1]}=>(\"${note}\", ${item[3]}),`;
+              }
+              tmp += "}";
+              setClaimlist(tmp);
+            }
+          });
           unsub();
         }
 
