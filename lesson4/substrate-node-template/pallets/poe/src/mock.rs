@@ -49,7 +49,8 @@ impl system::Trait for Test {
 	type OnKilledAccount = ();
 }
 parameter_types! {
-    pub const MaxClaimLength: u32 = 6;
+		pub const MaxClaimLength: u32 = 6;
+		pub const MaxClaimNoteLength: u32 = 256;
     pub const ExistentialDeposit: u64 = 1;
 }
 impl balances::Trait for Test {
@@ -62,7 +63,8 @@ impl balances::Trait for Test {
 impl Trait for Test {
 	type Event = ();
     type Currency = balances::Module<Test>;
-    type MaxClaimLength = MaxClaimLength;
+		type MaxClaimLength = MaxClaimLength;
+		type MaxClaimNoteLength = MaxClaimNoteLength;
 }
 pub type TemplateModule = Module<Test>;
 pub type System = system::Module<Test>;
