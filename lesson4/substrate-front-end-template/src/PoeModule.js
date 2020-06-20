@@ -76,14 +76,6 @@ function Main(props) {
           // Loop through Vec<EventRecord> to display all events
           events.forEach(({ phase, event: { data, method, section } }) => {
 
-            console.log('ListOneClaim' === method);
-            console.log(method, typeof(method));
-            console.log(`\t' ${phase}: ${section}.${method}:: ${data}`);
-            console.log(`${data}`);
-            console.log(data.toJSON());
-
-
-
             if ('ListOneClaim' === method) {
               list_info.push(data.toJSON())
             }
@@ -92,8 +84,7 @@ function Main(props) {
               tmp += "{";
               for (var index =0; index < list_info.length; index++) {
                 let item = list_info[index];
-                console.log(list_info);
-                console.log(typeof(item[4]))
+
                 let note = hexToUtf8(item[4].substr(2));
                 tmp += `${item[1]}=>(\"${note}\", ${item[3]}),`;
               }
