@@ -34,7 +34,9 @@ decl_storage! {
 	// storage items are isolated from other pallets.
 	// ---------------------------------vvvvvvvvvvvvvv
 	trait Store for Module<T: Trait> as TemplateModule {
-		Proofs get(fn proofs): map hasher(blake2_128_concat) Vec<u8> => (T::AccountId, T::BlockNumber, BalanceOf<T>);
+		Proofs get(fn proofs): map hasher(blake2_128_concat) Vec<u8> => (T::AccountId, T::BlockNumber, BalanceOf<T>, Option<Vec<u8>>);
+
+		AccountHash2List get(fn ah2l): map hasher(identity) T::AccountId => Vec<Vec<u8>>;
 	}
 }
 
@@ -77,15 +79,28 @@ decl_module! {
 		fn deposit_event() = default;
 
 		#[weight = 0]
-		pub fn create_claim(origin, claim: Vec<u8>, price: BalanceOf<T>) -> dispatch::DispatchResult {
+		pub fn create_claim(origin, claim: Vec<u8>, price: BalanceOf<T>, note: Option<Vec<u8>>) -> dispatch::DispatchResult {
 			let sender = ensure_signed(origin)?;
 
 			ensure!(!Proofs::<T>::contains_key(&claim), Error::<T>::ProofAlreadyExist);
-
-			// 附加题答案
 			ensure!(T::MaxClaimLength::get() >= claim.len() as u32, Error::<T>::ProofTooLong);
 
-			Proofs::<T>::insert(&claim, (sender.clone(), system::Module::<T>::block_number(), price));
+			Proofs::<T>::insert(&claim, (sender.clone(), system::Module::<T>::block_number(), price, note));
+
+			if AccountHash2List::<T>::contains_key(&sender) {
+                let mut vec = AccountHash2List::<T>::get(&sender);
+                match vec.binary_search(&claim) {
+                    // If the search succeeds, the caller is already a member, so just return
+                    Ok(_) => (),
+                    Err(index) => vec.insert(index, claim.clone()),
+                };
+                AccountHash2List::<T>::insert(&sender, vec);
+            }
+            else {
+                let mut vec = Vec::<Vec<u8>>::new();
+                vec.push(claim.clone());
+                AccountHash2List::<T>::insert(&sender, vec);
+            }
 
 			Self::deposit_event(RawEvent::ClaimCreated(sender, claim));
 
@@ -98,7 +113,7 @@ decl_module! {
 
 			ensure!(Proofs::<T>::contains_key(&claim), Error::<T>::ClaimNotExist);
 
-			let (owner, _block_number, _value) = Proofs::<T>::get(&claim);
+			let (owner, _block_number, _value, _note) = Proofs::<T>::get(&claim);
 
 			ensure!(owner == sender, Error::<T>::NotClaimOwner);
 
@@ -111,18 +126,18 @@ decl_module! {
 
 		// 第二题答案
 		#[weight = 0]
-		pub fn transfer_claim(origin, claim: Vec<u8>, dest: <T::Lookup as StaticLookup>::Source, price: BalanceOf<T>) -> dispatch::DispatchResult {
+		pub fn transfer_claim(origin, claim: Vec<u8>, dest: <T::Lookup as StaticLookup>::Source, price: BalanceOf<T>, note: Option<Vec<u8>>) -> dispatch::DispatchResult {
 			let sender = ensure_signed(origin)?;
 
 			ensure!(Proofs::<T>::contains_key(&claim), Error::<T>::ClaimNotExist);
 
-			let (owner, _block_number, _value) = Proofs::<T>::get(&claim);
+			let (owner, _block_number, _value, _note) = Proofs::<T>::get(&claim);
 
 			ensure!(owner == sender, Error::<T>::NotClaimOwner);
 
 			let dest = T::Lookup::lookup(dest)?;
 
-			Proofs::<T>::insert(&claim, (&dest, system::Module::<T>::block_number(), price));
+			Proofs::<T>::insert(&claim, (&dest, system::Module::<T>::block_number(), price, note));
 
 			Self::deposit_event(RawEvent::ClaimTransfered(owner, dest, claim));
 
@@ -130,16 +145,16 @@ decl_module! {
 		}
 
 		#[weight = 0]
-		pub fn buy_claim(origin, claim: Vec<u8> ,price: BalanceOf<T>) -> dispatch::DispatchResult {
+		pub fn buy_claim(origin, claim: Vec<u8> ,price: BalanceOf<T>, note: Option<Vec<u8>>) -> dispatch::DispatchResult {
 			let sender = ensure_signed(origin)?;
 
 			ensure!(Proofs::<T>::contains_key(&claim), Error::<T>::ClaimNotExist);
 
-			let (owner, _block_number, set_value) = Proofs::<T>::get(&claim);
+			let (owner, _block_number, set_value, _note) = Proofs::<T>::get(&claim);
 
 			ensure!(price > set_value, Error::<T>::TransferPriceToLow);
 
-			Proofs::<T>::insert(&claim, (sender.clone(), system::Module::<T>::block_number(), price));
+			Proofs::<T>::insert(&claim, (sender.clone(), system::Module::<T>::block_number(), price, note));
 
 			T::Currency::transfer(&sender, &owner, price, ExistenceRequirement::KeepAlive)?;
 

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Form, Input, Grid, Dropdown } from 'semantic-ui-react';
+import { Form, Input, Grid, Label, TextArea } from 'semantic-ui-react';
 
 import { useSubstrate } from './substrate-lib';
 import { TxButton } from './substrate-lib/components';
@@ -14,12 +14,9 @@ function Main (props) {
   const [status, setStatus] = useState('');
   const [digest, setDigest] = useState('');
   const [owner, setOwner] = useState('');
-  //const [AccountId, setAccountId] = useState('5FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty');
-  const [accountSelected, setAccountSelected] = useState('');
-  const [blockNumber, setBlockNumber] = useState(0);
-  const [formValue, setFormValue] = useState(0);
-  const [proofValue, getProofValue] = useState(0);
   const [remarkInfo,setRemarkInfo] = useState(0);
+  const [blockNumber, setBlockNumber] = useState(0);
+  const [proofValue, getProofValue] = useState(0);
   const [remarkInfoResult,setRemarkInfoResult] = useState(0);
 
   useEffect(() => {
@@ -54,6 +51,23 @@ function Main (props) {
     fileReader.readAsArrayBuffer(file);
   }
 
+  const MAX_NOTE_LENGTH = 256;
+  const onNoteChange = (_, data) => {
+    if (data.value && data.value.length > MAX_NOTE_LENGTH) {
+      data.value = data.value.substring(0, MAX_NOTE_LENGTH);
+    }
+    setRemarkInfo(data.value);
+  };
+
+  const notificationStyle = {
+    marginTop: 10,
+    border: '1px solid green',
+    backgroundColor: 'lightgreen',
+    color: 'darkgreen',
+    borderRadius: 5,
+    padding: 10
+  };
+
   // Get the list of accounts we possess the private key for
   const keyringOptions = keyring.getPairs().map(account => ({
     key: account.address,
@@ -62,13 +76,9 @@ function Main (props) {
     icon: 'user'
   }));
 
-  const onChange = address => {
-    setAccountSelected(address);
-  };
-
   return (
     <Grid.Column width={8}>
-      <h1>Proof of Existence Module</h1>
+      <h1>Proof of Existence</h1>
       <Form>
         <Form.Field>
           <Input
@@ -80,24 +90,17 @@ function Main (props) {
         </Form.Field> 
 
         <Form.Field>
-          <Input
-            label='Price'
-            state='newValue'
-            type='number'
-            onChange={(_, { value }) => setFormValue(value)}
-          />
-        </Form.Field>
-
-        <Form.Field>
-          <Input
-            label='Note'
-            state='newValue'
+          <Label>Note</Label>
+          <TextArea
             type='text'
-            onChange={(_, { value }) => setRemarkInfo(value)}
+            placeholder='Please input  noting (max limit 256 chars)'
+            state='Note'
+            maxLength={256}
+            onChange={onNoteChange}
           />
         </Form.Field>
 
-        <Form.Field>
+        <Form.Field style={{ textAlign: 'center' }}>
           <TxButton
             accountPair = {accountPair}
             label='Create Claim'
@@ -106,68 +109,14 @@ function Main (props) {
             attrs={{
               palletRpc: 'poeModule',
               callable: 'createClaim',
-              inputParams: [digest, formValue, remarkInfo],
-              paramFields: [true]
-            }}
-          />
-
-          <TxButton
-            accountPair={accountPair}
-            label='Revoke Claim'
-            setStatus={setStatus}
-            type='SIGNED-TX'
-            attrs={{
-              palletRpc: 'poeModule',
-              callable: 'revokeClaim',
-              inputParams: [digest, formValue],
-              paramFields: [true]
-            }}
-          />
-
-          <TxButton
-            accountPair={accountPair}
-            label='Buy Claim'
-            setStatus={setStatus}
-            type='SIGNED-TX'
-            attrs={{
-              palletRpc: 'poeModule',
-              callable: 'buyClaim',
-              inputParams: [digest, formValue, remarkInfo],
-              paramFields: [true]
-            }}
-          />
-
-          <Dropdown
-            search
-            selection
-            clearable
-            placeholder='Select an account to transfer'
-            options={keyringOptions}
-            onChange={(_, dropdown) => {
-              onChange(dropdown.value);
-            }}
-            value={accountSelected}
-          />
-
-          <TxButton
-            accountPair={accountPair}
-            label='Transfer Claim'
-            setStatus={setStatus}
-            type='SIGNED-TX'
-            attrs={{
-              palletRpc: 'poeModule',
-              callable: 'transferClaim',
-              inputParams: [digest,accountSelected, formValue, remarkInfo],
+              inputParams: [digest, 100, remarkInfo],
               paramFields: [true]
             }}
           />
         </Form.Field>
 
+        <div style={notificationStyle}>{ `You have successfully claimed file with hash  ${digest} with note "${remarkInfo}" ` }</div>
         <div>{status}</div>
-            <div>{ `Claim info:owner: ${owner} ` }</div>
-            <div>{`blockNumber: ${blockNumber}`}</div>
-            <div>{`transferValue: ${proofValue}`}</div>
-            <div>{`Note:${remarkInfoResult}`}</div>
       </Form>
     </Grid.Column>
   );
