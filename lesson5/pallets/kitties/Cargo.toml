@@ -1,7 +1,7 @@
 [package]
 name = "pallet-kitties"
-version = "0.1.0"
-authors = ["Bryan Chen"]
+version = "0.1.1"
+authors = ["Bryan Chen", "klcstudy"]
 edition = "2018"
 
 [dependencies]
