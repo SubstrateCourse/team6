@@ -5,6 +5,7 @@ use frame_support::{decl_module, decl_storage, decl_error, ensure, StorageValue,
 use sp_io::hashing::blake2_128;
 use frame_system::ensure_signed;
 use sp_runtime::{DispatchError, DispatchResult};
+use sp_std::vec::Vec;
 
 #[derive(Encode, Decode)]
 pub struct Kitty(pub [u8; 16]);
@@ -20,7 +21,7 @@ decl_storage! {
 		pub KittiesCount get(fn kitties_count): u32;
 
 		/// Get kitty ID by account ID and user kitty index
-		pub OwnedKitties get(fn owned_kitties): map hasher(blake2_128_concat) (T::AccountId, u32) => u32;
+		pub OwnedKitties get(fn owned_kitties): map hasher(blake2_128_concat) T::AccountId => Vec<u32>;
 		/// Get number of kitties by account ID
 		pub OwnedKittiesCount get(fn owned_kitties_count): map hasher(blake2_128_concat) T::AccountId => u32;
 	}
@@ -51,6 +52,7 @@ decl_module! {
 			let kitty = Kitty(dna);
 
 			// 作业：补完剩下的部分
+			Self::insert_kitty(sender, kitty_id ,kitty);
 		}
 
 		/// Breed kitties
@@ -70,6 +72,12 @@ fn combine_dna(dna1: u8, dna2: u8, selector: u8) -> u8 {
 impl<T: Trait> Module<T> {
 	fn random_value(sender: &T::AccountId) -> [u8; 16] {
 		// 作业：完成方法
+			let payload = (
+			<pallet_randomness_collective_flip::Module<T> as Randomness<T::Hash>>::random_seed() ,
+			&sender ,
+			<frame_system::Module<T>>::extrinsic_index(),	
+		);
+		payload.using_encoded(blake2_128)
 	}
 
 	fn next_kitty_id() -> sp_std::result::Result<u32, DispatchError> {
@@ -82,6 +90,13 @@ impl<T: Trait> Module<T> {
 
 	fn insert_kitty(owner: T::AccountId, kitty_id: u32, kitty: Kitty) {
 		// 作业：完成方法
+		let user_kitties_id = Self::owned_kitties_count(&owner);
+		let mut kitty_id_ = OwnedKitties::<T>::get(&owner);
+		kitty_id_.push(kitty_id);
+		<OwnedKitties<T>>::insert(owner.clone(),kitty_id_);
+		<OwnedKittiesCount<T>>::insert(owner.clone(),user_kitties_id+1);
+		Kitties::insert(kitty_id, kitty);
+		KittiesCount::put(kitty_id + 1);
 	}
 
 	fn do_breed(sender: T::AccountId, kitty_id_1: u32, kitty_id_2: u32) -> DispatchResult {
