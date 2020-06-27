@@ -336,7 +336,7 @@ mod tests {
 	#[test]
 	fn owned_kitties_can_remove_values() {
 		// 作业
-		with_externalities(&mut new_test_ext(), || {
+		new_test_ext().execute_with(|| {
 			OwnedKittiesTest::append(&0, 1);
  			OwnedKittiesTest::append(&0, 2);
  			OwnedKittiesTest::append(&0, 3);
