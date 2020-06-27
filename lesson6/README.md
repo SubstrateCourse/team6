@@ -123,3 +123,13 @@ git checkout <branch/tag/sha1>
 
 Noted though you will likely get faster and more thorough support if you stick with the releases
 provided in this repository.
+
+1.对比 pallet-asset 和 pallet-balances, 简单分析下pallet-asset都有哪些缺失的使其不适合生产环境使用？
+答：
+第一、pallet-asset缺少reserved和lock的功能<br>
+第二、pallet-asset缺少尘埃账户删除功能,浪费链上资源占用。<br>
+第三、pallet-asset缺少权重的设计<br>
+
+2.简单的分析下为什么 Polkadot 配置的 Balance 类型是 u128，而不是类似以太坊的 u256？（a. 注:DOT 发行量是 1000 万个，精度是12位，年增发率是 10%）
+答：主要是足够用，相对于DOT发行量1000万个，u128非常大，即便除12位的精度，存储依然足够。当然这种实现，借助了SCALE编码的强大功能。
+
