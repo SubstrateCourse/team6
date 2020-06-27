@@ -123,3 +123,13 @@ git checkout <branch/tag/sha1>
 
 Noted though you will likely get faster and more thorough support if you stick with the releases
 provided in this repository.
+
+## 对比 assets 和 balances
+1 assets简单的多资产管理
+2 缺少灰尘账户管理
+3 缺少权重设计
+4 缺少reserved和lock
+
+
+## 波卡的balance默认配置是u128不是u256
+波卡的总量是1000万，128位也够用了
