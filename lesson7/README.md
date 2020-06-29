@@ -123,3 +123,15 @@ git checkout <branch/tag/sha1>
 
 Noted though you will likely get faster and more thorough support if you stick with the releases
 provided in this repository.
+
+
+1.修复单元测试
+
+2.
+A-分析add_member的计算复杂度
+B-分析pallet-membership是否适合以下场景下使用，提供原因：
+(1)存储预言机提供者
+
+(2)存储游戏链中每个工会的成员
+
+(3)存储PoA网络验证
