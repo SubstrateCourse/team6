@@ -123,3 +123,15 @@ git checkout <branch/tag/sha1>
 
 Noted though you will likely get faster and more thorough support if you stick with the releases
 provided in this repository.
+############################
+## 阅读 pallet-membership
+* 分析 add_member 的计算复杂度
+为O(N^2)
+
+* 分析 pallet-membership 是否适合以下场景下使用,提供原因
+  * 储存预言机提供者
+    `人数不多可以保存, 并且修改不频繁`
+  * 储存游戏链中每个工会的成员
+    `人数太多不能保存, 并且修改频繁.`
+  * 储存 PoA 网络验证人
+    `人数不多可以保存, PoA验证人相对固定, 并且修改不频繁.`
