@@ -270,8 +270,32 @@ mod tests {
 		type OnNewAccount = ();
 		type OnKilledAccount = ();
 	}
+	parameter_types! {
+		pub const ExistentialDeposit: u64 = 0;
+		pub const TransferFee: u64 = 0;
+		pub const CreationFee: u64 = 0;
+		pub const TransactionBaseFee: u64 = 0;
+		pub const TransactionByteFee: u64 = 0;
+	}
+	// impl balances::Trait for Test {
+	// 	type Balance = u64;
+	// 	type OnFreeBalanceZero = ();
+	// 	type OnNewAccount = ();
+	// 	type Event = ();
+	// 	type TransactionPayment = ();
+	// 	type TransferPayment = ();
+	// 	type DustRemoval = ();
+	// 	type ExistentialDeposit = ExistentialDeposit;
+	// 	type TransferFee = TransferFee;
+	// 	type CreationFee = CreationFee;
+	// 	type TransactionBaseFee = TransactionBaseFee;
+	// 	type TransactionByteFee = TransactionByteFee;
+	// 	type WeightToFee = ();
+	// }
 	impl Trait for Test {
 		type KittyIndex = u32;
+		// type Currency = balances::Module<Test>;
+		type Event = ();
 	}
 	type OwnedKittiesTest = OwnedKitties<Test>;
 
