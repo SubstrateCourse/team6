@@ -125,13 +125,17 @@ Noted though you will likely get faster and more thorough support if you stick w
 provided in this repository.
 
 
-1.修复单元测试
+# 1.修复单元测试
+## 测试截图
+![Image text](https://github.com/AmadeusGB/team6/blob/lesson7/lesson7/images/p1.png)
 
-2.
-A-分析add_member的计算复杂度
-B-分析pallet-membership是否适合以下场景下使用，提供原因：
+# 2.
+## A-分析add_member的计算复杂度
+答：函数的计算复杂度由搜索插入的binary_search/insert和排序的change_members_sorted来决定。其中搜索的复杂度为O(logN)，排序复杂度为O(N)，总复杂度为O(logN)+O(N)。
+
+## B-分析pallet-membership是否适合以下场景下使用，提供原因：
 (1)存储预言机提供者
-
 (2)存储游戏链中每个工会的成员
-
 (3)存储PoA网络验证
+
+答：pallet-membership提供一个member队列和一个主会员功能，其增删操作具有较大的复杂度。所以，适合相对固定的成员，并有主成员需求的场景。（1）和（3）的成员数量相对少且固定，适合；（2）由于工会成员数量可能非常庞大，增删操作很慢，并不适合。
