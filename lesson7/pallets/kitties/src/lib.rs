@@ -229,6 +229,9 @@ mod tests {
 		traits::{BlakeTwo256, IdentityLookup}, testing::Header, Perbill,
 	};
 	use frame_system as system;
+	use pallet_balances as balances;
+	// use sp_std::alloc::System;
+	// use std::alloc::System;
 
 	impl_outer_origin! {
 		pub enum Origin for Test {}
@@ -266,7 +269,8 @@ mod tests {
 		type AvailableBlockRatio = AvailableBlockRatio;
 		type Version = ();
 		type ModuleToIndex = ();
-		type AccountData = ();
+		// type AccountData = ();
+		type AccountData = balances::AccountData<u64>;
 		type OnNewAccount = ();
 		type OnKilledAccount = ();
 	}
@@ -277,27 +281,21 @@ mod tests {
 		pub const TransactionBaseFee: u64 = 0;
 		pub const TransactionByteFee: u64 = 0;
 	}
-	// impl balances::Trait for Test {
-	// 	type Balance = u64;
-	// 	type OnFreeBalanceZero = ();
-	// 	type OnNewAccount = ();
-	// 	type Event = ();
-	// 	type TransactionPayment = ();
-	// 	type TransferPayment = ();
-	// 	type DustRemoval = ();
-	// 	type ExistentialDeposit = ExistentialDeposit;
-	// 	type TransferFee = TransferFee;
-	// 	type CreationFee = CreationFee;
-	// 	type TransactionBaseFee = TransactionBaseFee;
-	// 	type TransactionByteFee = TransactionByteFee;
-	// 	type WeightToFee = ();
-	// }
+	impl balances::Trait for Test {
+		type Balance = u64;
+		type Event = ();
+		type DustRemoval = ();
+		type ExistentialDeposit = ExistentialDeposit;
+    	type AccountStore = System;
+	}
 	impl Trait for Test {
 		type KittyIndex = u32;
-		// type Currency = balances::Module<Test>;
+		type Currency = balances::Module<Test>;
+		type Randomness = pallet_randomness_collective_flip::Module<Test>;
 		type Event = ();
 	}
 	type OwnedKittiesTest = OwnedKitties<Test>;
+	type System = system::Module<Test>;
 
 	// This function basically just builds a genesis storage key/value store according to
 	// our desired mockup.
