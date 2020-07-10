@@ -9,7 +9,7 @@
 include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 
 use sp_std::prelude::*;
-use sp_core::{crypto::KeyTypeId, OpaqueMetadata, Encode};
+use sp_core::{crypto::KeyTypeId, OpaqueMetadata};
 use sp_runtime::{
 	ApplyExtrinsicResult, generic, create_runtime_str, impl_opaque_keys, MultiSignature,
 	transaction_validity::{TransactionValidity, TransactionSource},
@@ -261,10 +261,9 @@ impl sudo::Trait for Runtime {
 /// Used for the module template in `./template.rs`
 impl template::Trait for Runtime {
 	type AuthorityId = template::crypto::AuthId;
-	type Event = Event;
 	type Call = Call;
+	type Event = Event;
 }
-
 impl<LocalCall> system::offchain::CreateSignedTransaction<LocalCall> for Runtime
 where
 	Call: From<LocalCall>,
@@ -321,6 +320,7 @@ where
 	type Extrinsic = UncheckedExtrinsic;
 }
 
+
 construct_runtime!(
 	pub enum Runtime where
 		Block = Block,
@@ -352,6 +352,7 @@ pub type SignedBlock = generic::SignedBlock<Block>;
 pub type BlockId = generic::BlockId<Block>;
 /// The SignedExtension to the basic transaction logic.
 pub type SignedExtra = (
+	system::CheckSpecVersion<Runtime>,
 	system::CheckTxVersion<Runtime>,
 	system::CheckGenesis<Runtime>,
 	system::CheckEra<Runtime>,
