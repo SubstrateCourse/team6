@@ -9,15 +9,19 @@
 /// For more guidance on Substrate FRAME, see the example pallet
 /// https://github.com/paritytech/substrate/blob/master/frame/example/src/lib.rs
 
-use frame_support::{debug, decl_module, decl_storage, decl_event, decl_error, dispatch};
-use frame_system::{self as system, ensure_signed,
-					offchain::{
-						AppCrypto, CreateSignedTransaction, SendSignedTransaction, Signer
-					},
-					};
 use core::{convert::TryInto};
-use sp_std::prelude::*;
+use frame_support::{
+	debug, decl_module, decl_storage, decl_event,
+	dispatch
+};
+use frame_system::{
+	self as system, ensure_signed,
+	offchain::{
+		AppCrypto, CreateSignedTransaction, SendSignedTransaction, Signer
+	},
+};
 use sp_core::crypto::KeyTypeId;
+use sp_std::prelude::*;
 
 #[cfg(test)]
 mod mock;
@@ -25,17 +29,18 @@ mod mock;
 #[cfg(test)]
 mod tests;
 
-/// The pallet's configuration trait.
-pub trait Trait: system::Trait + CreateSignedTransaction<Call<Self>>  {
-	// Add other types and constants required to configure this pallet.
+pub const KEY_TYPE: KeyTypeId = KeyTypeId(*b"ocw8");
 
+/// The pallet's configuration trait.
+pub trait Trait: system::Trait + CreateSignedTransaction<Call<Self>> {
+	// Add other types and constants required to configure this pallet.
+	/// The identifier type for an offchain worker.
+	type AuthorityId: AppCrypto<Self::Public, Self::Signature>;
+	/// The overarching dispatch call type.
+	type Call: From<Call<Self>>;
 	/// The overarching event type.
 	type Event: From<Event<Self>> + Into<<Self as system::Trait>::Event>;
-	type AuthorityId: AppCrypto<Self::Public, Self::Signature>;
-	type Call: From<Call<Self>>;
 }
-
-pub const KEY_TYPE: KeyTypeId = KeyTypeId(*b"ocw8");
 
 pub mod crypto {
 	use crate::KEY_TYPE;
@@ -68,102 +73,70 @@ pub mod crypto {
 
 // This pallet's storage items.
 decl_storage! {
-	// It is important to update your storage name so that your pallet's
-	// storage items are isolated from other pallets.
-	// ---------------------------------vvvvvvvvvvvvvv
 	trait Store for Module<T: Trait> as TemplateModule {
-		// Just a dummy storage item.
-		// Here we are declaring a StorageValue, `Something` as a Option<u32>
-		// `get(fn something)` is the default getter which returns either the stored `u32` or `None` if nothing stored
-		Numbers get(fn numbers):map hasher(blake2_128_concat) u64 => u64;
+		Numbers get(fn numbers): map hasher(blake2_128_concat) u64 => u64;
 	}
 }
 
 // The pallet's events
 decl_event!(
 	pub enum Event<T> where AccountId = <T as system::Trait>::AccountId {
-		/// Just a dummy event.
-		/// Event `Something` is declared with a parameter of the type `u32` and `AccountId`
-		/// To emit this event, we call the deposit function, from our runtime functions
-		
-		NumbersAppended(AccountId, u64 , u64),
+		NumberAppended(AccountId, u64, u64),
 	}
 );
-
-// The pallet's errors
-decl_error! {
-	pub enum Error for Module<T: Trait> {
-		/// Value was None
-		NoneValue,
-		/// Value reached maximum and cannot be incremented further
-		StorageOverflow,
-	}
-}
 
 // The pallet's dispatchable functions.
 decl_module! {
 	/// The module declaration.
 	pub struct Module<T: Trait> for enum Call where origin: T::Origin {
-		// Initializing errors
-		// this includes information about your errors in the node's metadata.
-		// it is needed only if you are using errors in your pallet
-		type Error = Error<T>;
-
 		// Initializing events
 		// this is needed only if you are using events in your pallet
 		fn deposit_event() = default;
 
 		#[weight = 10_000]
-		pub fn save_number(origin,index:u64, number: u32) -> dispatch::DispatchResult {
+		pub fn save_number(origin, index: u64, number: u64) -> dispatch::DispatchResult {
 			// Check it was signed and get the signer. See also: ensure_root and ensure_none
 			let who = ensure_signed(origin)?;
 
-			Numbers::insert(index, number as u64);
-			Self::deposit_event(RawEvent::NumbersAppended(who, index , number as u64 ));
-			/*******
-			 * 学员们在这里追加逻辑
-			 *******/
-
+			Numbers::insert(index, number);
+			Self::deposit_event(RawEvent::NumberAppended(who, index, number));
 			Ok(())
 		}
 
 		fn offchain_worker(block_number: T::BlockNumber) {
-			debug::info!("Entering off-chain workers");
-	
-			/*******
-			 * 学员们在这里追加逻辑
-			 *******/
-			 Self::submit_number(block_number);
-		}
+			debug::info!("Entering off-chain workers: {:?}", block_number);
 
+			Self::submit_number(block_number);
+		} // End of `fn offchain_worker`
 	}
 }
 
 impl<T: Trait> Module<T> {
 	fn submit_number(block_number: T::BlockNumber) {
 		let index: u64 = block_number.try_into().ok().unwrap() as u64;
-		let lastest = if index > 0 {
-			Self::numbers((index - 1)as u64)
+		let latest = if index > 0 {
+			Self::numbers((index - 1) as u64)
 		} else {
 			0
 		};
 
-		let new: u64 = lastest.saturating_add((index + 1).saturating_pow(2));
+		let new: u64 = latest.saturating_add((index + 1).saturating_pow(2));
 
-		let signer = Signer::<T , T::AuthorityId>::all_accounts();
-		if !signer.can_sign(){
+		let signer = Signer::<T, T::AuthorityId>::all_accounts();
+		if !signer.can_sign() {
 			debug::error!("No local account available");
 			return;
 		}
 
 		let results = signer.send_signed_transaction(|_acct| {
-			Call::save_number(index,new)
+			// We are just submitting the current block number back on-chain
+			Call::save_number(index, new)
 		});
 
-		for (_acct, res) in &results {
+		for (_acc, res) in &results {
 			match res {
-				Ok(()) => {debug::native::info!("off-chain tx succeeded number: {}",new);}
-				Err(_e) => {debug::error!("off-chain tx failed: number: {}",new);}
+				Ok(()) => { debug::native::info!("off-chain tx succeeded: number: {}", new); }
+				Err(_e) => { debug::error!("off-chain tx failed: number: {}", new); }
 			};
 		}
 	}
