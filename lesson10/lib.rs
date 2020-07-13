@@ -3,74 +3,138 @@
 use ink_lang as ink;
 
 #[ink::contract(version = "0.1.0")]
-mod lesson10 {
+mod erc20 {
     use ink_core::storage;
 
-    /// Defines the storage of your contract.
-    /// Add new fields to the below struct in order
-    /// to add new static storage fields to your contract.
     #[ink(storage)]
-    struct Lesson10 {
-        /// Stores a single `bool` value on the storage.
-        value: storage::Value<bool>,
+    struct Erc20 {
+        total_supply: storage::Value<Balance>,
+        balances: storage::HashMap<AccountId, Balance>,
+        allowance: storage::HashMap<(AccountId, AccountId), Balance>,
     }
 
-    impl Lesson10 {
-        /// Constructor that initializes the `bool` value to the given `init_value`.
+    #[ink(event)]
+    struct Transfer {
+        #[ink(topic)]
+        from: Option<AccountId>,
+        #[ink(topic)]
+        to: Option<AccountId>,
+        value: Option<Balance>,
+    }
+
+    #[ink(event)]
+    struct Allowance {
+        #[ink(topic)]
+        from: Option<AccountId>,
+        #[ink(topic)]
+        to: Option<AccountId>,
+        #[ink(topic)]
+        value: Option<Balance>,
+    }
+
+    impl Erc20 {
         #[ink(constructor)]
-        fn new(&mut self, init_value: bool) {
-            self.value.set(init_value);
+        fn new(&mut self, initial_supply: Balance) {
+            let caller = self.env().caller();
+            self.total_supply.set(initial_supply);
+            self.balances.insert(caller, initial_supply);
+            self.env().emit_event(Transfer {
+                from: None,
+                to: caller,
+                value: initial_supply,
+            });
         }
 
-        /// Constructor that initializes the `bool` value to `false`.
-        ///
-        /// Constructors can delegate to other constructors.
-        #[ink(constructor)]
-        fn default(&mut self) {
-            self.new(false)
-        }
-
-        /// A message that can be called on instantiated contracts.
-        /// This one flips the value of the stored `bool` from `true`
-        /// to `false` and vice versa.
         #[ink(message)]
-        fn flip(&mut self) {
-            *self.value = !self.get();
+        fn total_supply(&self) -> Balance {
+            *self.total_supply
         }
 
-        /// Simply returns the current value of our `bool`.
         #[ink(message)]
-        fn get(&self) -> bool {
-            *self.value
+        fn balance_of(&self, owner: AccountId) -> Balance {
+            self.balance_of_or_zero(&owner)
+        }
+
+        fn balance_of_or_zero(&self, owner: AccountId) -> Balance {
+            *self.balances.get(owner).unwrap_or(&0)
+        }
+
+        #[ink(message)]
+        fn transfer(&mut self, to: AccountId, value: Balance) -> bool {
+            let from = self.env().caller;
+            let from_balance = self.balance_of_or_zero(&from);
+            if from_balance < value {
+                return false
+            }
+            let to_balance = self.balance_of_or_zero(&to);
+            self.balances.insert(from, from_balance - value);
+            self.balances.insert(to, to_balance + value);
+            self.env().emit_event(Transfer{
+                from: Some(from),
+                to: Some(to),
+                value,
+            });
+            true
+        }
+
+        #[ink(message)]
+        fn allowance_quota(&mut self, to: AccountId, value: Balance) -> bool {
+            let from = self.env().caller;
+            let from_balance = self.balance_of_or_zero(&from);
+            if from_balance < value {
+                return false
+            }
+            self.allowance.insert((from, to), value);
+            self.env().emit_event(Allowance {
+                from: Some(from),
+                to: Some(to),
+                value: Some(value),
+            });
+            ture
+        }
+
+        #[ink(message)]
+        fn allowance_check(&mut self, to: AccountId) -> Balance {
+            let from = self.env().caller;
+            *self.allowance.get((from, to)).unwrap_or(&0)
+        }
+
+        #[ink(message)]
+        fn transfer_from(&mut self, Investor: AccountId, to: AccountId, value: Balance) -> bool {
+            let from = self.env().caller;     
+
+            //金主允许from花多少钱
+            let allowance_balance = self.allowance_check(&Investor);
+            if allowance_balance < value {
+                return false
+            }
+
+            //金主目前有多少钱
+            let Investor_balance = self.balance_of_or_zero(&Investor);
+            if Investor_balance < value {
+                return false
+            }
+
+            //付款
+            let to_balance = self.balance_of_or_zero(&to);
+            self.balances.insert(Investor, Investor_balance - value);
+            self.balances.insert(to, to_balance + value);
+
+            //额度减少
+            self.allowance.insert((Investor, from), allowance_balance - value);
+            
+            true
         }
     }
 
-    /// Unit tests in Rust are normally defined within such a `#[cfg(test)]`
-    /// module and test functions are marked with a `#[test]` attribute.
-    /// The below code is technically just normal Rust code.
     #[cfg(test)]
     mod tests {
-        /// Imports all the definitions from the outer scope so we can use them here.
         use super::*;
 
-        /// We test if the default constructor does its job.
         #[test]
-        fn default_works() {
-            // Note that even though we defined our `#[ink(constructor)]`
-            // above as `&mut self` functions that return nothing we can call
-            // them in test code as if they were normal Rust constructors
-            // that take no `self` argument but return `Self`.
-            let lesson10 = Lesson10::default();
-            assert_eq!(lesson10.get(), false);
-        }
-
-        /// We test a simple use case of our contract.
-        #[test]
-        fn it_works() {
-            let mut lesson10 = Lesson10::new(false);
-            assert_eq!(lesson10.get(), false);
-            lesson10.flip();
-            assert_eq!(lesson10.get(), true);
+        fn new_works() {
+            let erc20 = Erc20::new(666);
+            assert_eq!(erc20.total_supply(), 666);
         }
     }
 }
