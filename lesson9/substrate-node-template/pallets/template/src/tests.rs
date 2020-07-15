@@ -1,18 +1,14 @@
 // Tests to be written here
 
-use crate::{Error, mock::*};
-use frame_support::{assert_ok, assert_noop};
-
-#[test]
-fn test_onchain() {
-	new_test_ext().execute_with(|| {
-		// Test onchain logic here
-	});
-}
+use crate::{mock::*};
 
 #[test]
 fn test_offchain() {
-	new_test_ext().execute_with(|| {
-		// Test offchain worker here
+	let (mut t, _pool_state, _offchain_state) = ExtBuilder::build();
+	t.execute_with(|| {
+		let r = TemplateModule::fetch(true);
+		assert!(r.is_ok());
+		let r = TemplateModule::fetch(true);
+		assert!(r.is_ok());
 	});
 }
