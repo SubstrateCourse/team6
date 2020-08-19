@@ -1,0 +1,10 @@
+{
+  "jsonrpc":"2.0",
+  "id":1,
+  "method":"author_insertKey",
+  "params": [
+    "aura",
+    "trap away divorce belt dentist slim avoid decrease void base economy secret",
+    "0x4403d8498e00a087e30f6b1fd7202de662253e8baa6360437dfeb64bfa3dfd56"
+  ]
+}
