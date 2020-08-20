@@ -125,7 +125,7 @@ Secret phrase `flavor fly rely inhale remain cup improve bargain captain kind bu
 ```  
 ### 2.2 修改customSpec配置文件，生成customSpecRaw
 ```  
-root@7590:/home/team6/lesson12# target/release/node-template build-spec --disable-default-bootnode --chain local > customSpec.json
+root@7590:/home/team6/lesson12# ./target/release/node-template build-spec --disable-default-bootnode --chain local > customSpec.json
 
       "aura": {
         "authorities": [ "5DbtFmi2upCSEaqbZgXCAJakHXze6ogtDZKzE1b5KCu5BN4g",
@@ -134,7 +134,7 @@ root@7590:/home/team6/lesson12# target/release/node-template build-spec --disabl
         "authorities": [ [ "5EZeyJ85Z3mmW1uNxiEzQZs9cPWmqPJpFQAajdfTroGjyGN6", 1 ],
           [ "5G5U4UfhtDmGtLwbmLdUJ4RhTV9Kie3ezZS4sFMtzSJfMrzZ", 1 ] ] },
 
-target/release/node-template build-spec --chain=customSpec.json --raw --disable-default-bootnode > customSpecRaw.json
+root@7590:/home/team6/lesson12# ./target/release/node-template build-spec --chain=customSpec.json --raw --disable-default-bootnode > customSpecRaw.json
 ```  
 ## 3.（附加题）根据 Chain Spec，部署公开测试网络。
 
@@ -144,11 +144,11 @@ Note: 上传 telemetry.polkadot.io 上你的网络节点的截图，或者apps�
 ```
 target/release/node-template purge-chain --chain customSpecRaw.json -y -d target/node01
 target/release/node-template purge-chain --chain customSpecRaw.json -y -d target/node02  
-```
-
+```  
 ### 3.2 第一位参与者启动Bootnode,并使用curl插入密钥库
+```  
 ./target/release/node-template \
-  --base-path /tmp/node01 \
+  --base-path target/node01 \
   --chain=./customSpecRaw.json \
   --port 30333 \
   --ws-port 9944 \
@@ -156,16 +156,18 @@ target/release/node-template purge-chain --chain customSpecRaw.json -y -d target
   --telemetry-url 'ws://telemetry.polkadot.io:1024 0' \
   --validator \
   --rpc-methods=Unsafe \
-  --name GWNode01
+  --name MyNode01
 
-curl http://localhost:9933 -H "Content-Type:application/json;charset=utf-8" -d "@/home/team6/lesson12/node01-aura.json"
-curl http://localhost:9933 -H "Content-Type:application/json;charset=utf-8" -d "@/home/team6/lesson12/node01-gran.json"
 
-查询 peerId
+curl http://localhost:9933 -H "Content-Type:application/json;charset=utf-8" -d "@node01-aura.json"
+curl http://localhost:9933 -H "Content-Type:application/json;charset=utf-8" -d "@node01-gran.json"
+
 curl -H "Content-Type: application/json" -d '{"id":1, "jsonrpc":"2.0", "method": "system_localPeerId", "params":[]}' http://localhost:9933
+```  
 
-
-target/release/node-template \
+### 3.3 第二位参与者启动Bootnode,并使用curl插入密钥库
+```  
+./target/release/node-template \
   --base-path target/node02 \
   --chain=customSpecRaw.json \
   --port 30334 \
@@ -175,7 +177,24 @@ target/release/node-template \
   --validator \
   --rpc-methods=Unsafe \
   --name GWNode02 \
-  --bootnodes /ip4/127.0.0.1/tcp/30333/p2p/xxx
+  --bootnodes /ip4/127.0.0.1/tcp/30333/p2p/12D3KooWJFf576XdNnXrTRhzTvuU1UGyAt39TifcUc3QK9icNZu6
 
-curl http://localhost:9934 -H "Content-Type:application/json;charset=utf-8" -d "@/home/team6/lesson12/node02-aura.json"
-curl http://localhost:9934 -H "Content-Type:application/json;charset=utf-8" -d "@/home/team6/lesson12/node02-gran.json"
+
+curl http://localhost:9934 -H "Content-Type:application/json;charset=utf-8" -d "@node02-aura.json"
+curl http://localhost:9934 -H "Content-Type:application/json;charset=utf-8" -d "@node02-gran.json"  
+```  
+
+
+
+
+```  
+
+![x](runnode.png)
+
+```  
+```  
+
+![x](telemetry.png)
+
+```  
+
