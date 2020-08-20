@@ -183,16 +183,9 @@ curl -H "Content-Type: application/json" -d '{"id":1, "jsonrpc":"2.0", "method":
 curl http://localhost:9934 -H "Content-Type:application/json;charset=utf-8" -d "@node02-aura.json"
 curl http://localhost:9934 -H "Content-Type:application/json;charset=utf-8" -d "@node02-gran.json"  
 ```  
-### 3.4 命令行终端节点运行图
-```  
-
-![x](runnode.png)
-
-```  
-### 3.5 telemetry节点运行图
-```  
-
-![x](telemetry.png)
-
-```  
+### 3.4 命令行终端节点运行图  
+![Image text](https://github.com/AmadeusGB/team6/blob/lesson12/lesson12/images/runnode.png)
+  
+### 3.5 telemetry节点运行图  
+![Image text](https://github.com/AmadeusGB/team6/blob/lesson12/lesson12/images/telemetry.png)
 
