@@ -156,7 +156,7 @@ target/release/node-template purge-chain --chain customSpecRaw.json -y -d target
   --telemetry-url 'ws://telemetry.polkadot.io:1024 0' \
   --validator \
   --rpc-methods=Unsafe \
-  --name MyNode01
+  --name GWNode01
 
 
 curl http://localhost:9933 -H "Content-Type:application/json;charset=utf-8" -d "@node01-aura.json"
@@ -177,21 +177,19 @@ curl -H "Content-Type: application/json" -d '{"id":1, "jsonrpc":"2.0", "method":
   --validator \
   --rpc-methods=Unsafe \
   --name GWNode02 \
-  --bootnodes /ip4/127.0.0.1/tcp/30333/p2p/12D3KooWJFf576XdNnXrTRhzTvuU1UGyAt39TifcUc3QK9icNZu6
+  --bootnodes /ip4/127.0.0.1/tcp/30333/p2p/12D3KooWKx92FWZ6o25gCN4uuZyP94pcfJAJQd5VHr6R8oxjcrKr
 
 
 curl http://localhost:9934 -H "Content-Type:application/json;charset=utf-8" -d "@node02-aura.json"
 curl http://localhost:9934 -H "Content-Type:application/json;charset=utf-8" -d "@node02-gran.json"  
 ```  
-
-
-
-
+### 3.4 命令行终端节点运行图
 ```  
 
 ![x](runnode.png)
 
 ```  
+### 3.5 telemetry节点运行图
 ```  
 
 ![x](telemetry.png)
