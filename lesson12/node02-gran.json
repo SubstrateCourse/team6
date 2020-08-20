@@ -1,0 +1,12 @@
+{
+  "jsonrpc":"2.0",
+  "id":1,
+  "method":"author_insertKey",
+  "params": [
+    "gran",
+    "flavor fly rely inhale remain cup improve bargain captain kind bundle toddler",
+    "0xb185bc8568267b0cf22206fe157c583546b1163c59adfbc47d095b7860ef74e7"
+  ]
+}
+
+

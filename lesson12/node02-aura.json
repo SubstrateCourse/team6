@@ -1,0 +1,11 @@
+{
+  "jsonrpc":"2.0",
+  "id":1,
+  "method":"author_insertKey",
+  "params": [
+    "aura",
+    "flavor fly rely inhale remain cup improve bargain captain kind bundle toddler",
+    "0x8e5f6586fb3e5539caf2f7e9d641127ed62dd8bafbbdf3fbd22081dfa4774200"
+  ]
+}
+
